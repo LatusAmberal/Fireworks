@@ -4,9 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fireworks</title>
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="shortcut icon" href="icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#202225">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fireworks">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- ============ REGISTRATION SCREEN (first-time users) ============ -->
+    <div id="register-screen" class="onboard-screen">
+        <div class="onboard-bg"></div>
+        <div class="onboard-content">
+            <div class="onboard-logo">
+                <svg viewBox="0 0 512 512" width="72" height="72">
+                    <rect width="512" height="512" rx="112" fill="#2f3136"/>
+                    <g transform="translate(256, 256)" fill="none" stroke="#ffffff" stroke-linecap="round">
+                        <circle r="8" fill="#ffffff" stroke="none" opacity="0.95"/>
+                        <g stroke-width="4.5">
+                            <line x1="0" y1="-20" x2="0" y2="-100"/>
+                            <line x1="0" y1="20" x2="0" y2="100"/>
+                            <line x1="-20" y1="0" x2="-100" y2="0"/>
+                            <line x1="20" y1="0" x2="100" y2="0"/>
+                            <line x1="-14" y1="-14" x2="-71" y2="-71"/>
+                            <line x1="14" y1="-14" x2="71" y2="-71"/>
+                            <line x1="-14" y1="14" x2="-71" y2="71"/>
+                            <line x1="14" y1="14" x2="71" y2="71"/>
+                        </g>
+                        <g stroke-width="3" opacity="0.5">
+                            <line x1="-8" y1="-19" x2="-38" y2="-91"/>
+                            <line x1="8" y1="-19" x2="38" y2="-91"/>
+                            <line x1="-8" y1="19" x2="-38" y2="91"/>
+                            <line x1="8" y1="19" x2="38" y2="91"/>
+                            <line x1="-19" y1="-8" x2="-91" y2="-38"/>
+                            <line x1="-19" y1="8" x2="-91" y2="38"/>
+                            <line x1="19" y1="-8" x2="91" y2="-38"/>
+                            <line x1="19" y1="8" x2="91" y2="38"/>
+                        </g>
+                    </g>
+                    <g fill="#ffffff">
+                        <circle cx="256" cy="156" r="6"/>
+                        <circle cx="256" cy="356" r="6"/>
+                        <circle cx="156" cy="256" r="6"/>
+                        <circle cx="356" cy="256" r="6"/>
+                        <circle cx="185" cy="185" r="5"/>
+                        <circle cx="327" cy="185" r="5"/>
+                        <circle cx="185" cy="327" r="5"/>
+                        <circle cx="327" cy="327" r="5"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="onboard-title">Fireworks</h1>
+            <p class="onboard-subtitle">在这里，每一条消息都是一场烟花</p>
+            <div class="register-form">
+                <input type="text" id="registerNickname" class="register-input" placeholder="输入你的昵称" maxlength="20" autocomplete="off">
+                <input type="password" id="registerPassword" class="register-input" placeholder="输入密码" maxlength="30" autocomplete="off">
+                <button id="registerSubmit" class="register-btn">进入</button>
+            </div>
+            <p class="register-hint">任意密码均可进入，仅用于本地体验</p>
+        </div>
+    </div>
+
+    <!-- ============ SPLASH ANIMATION ============ -->
+    <div id="splash-screen" class="onboard-screen" style="display:none">
+        <div class="onboard-bg"></div>
+        <canvas id="splash-canvas" class="splash-canvas"></canvas>
+        <div class="splash-content">
+            <h1 class="splash-title" id="splashTitle">Sonnet</h1>
+            <p class="splash-poem" id="splashPoem">Shall I compare thee to a summer's day?<br>Thou art more lovely and more temperate.</p>
+        </div>
+    </div>
+
     <div id="app">
         <style id="custom-css"></style>
 
@@ -162,7 +235,7 @@
             </div>
             <!-- Scroll to bottom button -->
             <div class="scroll-bottom-btn" id="scrollBottomBtn" style="display:none">
-                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 4l-8 8h6v8h4v-8h6z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 20l-8-8h6v-8h4v8h6z" fill="currentColor"/></svg>
             </div>
             <div class="chat-input-bar">
                 <button class="chat-plus-btn" id="chatPlusBtn" title="更多功能">
@@ -305,8 +378,19 @@
             <div class="multi-select-bar" id="multiSelectBar" style="display:none">
                 <button class="btn-secondary btn-sm" id="multiSelectCancel">取消</button>
                 <span id="multiSelectCount">已选 0 项</span>
+                <button class="btn-primary btn-sm" id="multiSelectMove">移至分组</button>
                 <button class="btn-danger btn-sm" id="multiSelectDelete">删除选中</button>
                 <button class="btn-secondary btn-sm" id="multiSelectBlock">屏蔽选中</button>
+            </div>
+            <!-- Move-to-group picker modal -->
+            <div class="modal-overlay" id="moveGroupModal" style="display:none">
+                <div class="modal">
+                    <div class="modal-header">移至分组</div>
+                    <div class="group-picker-list" id="moveGroupList"></div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" id="moveGroupCancel">取消</button>
+                    </div>
+                </div>
             </div>
             <input type="file" id="cardFileInput" accept=".txt" style="display:none">
         </div>
