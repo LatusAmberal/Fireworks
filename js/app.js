@@ -347,8 +347,12 @@ const Onboarding = {
         this._startTime = performance.now();
 
         const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            this._dpr = dpr;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
         };
         resize();
         this._resizeHandler = resize;
@@ -357,14 +361,16 @@ const Onboarding = {
         const animate = (now) => {
             const ctx = this._ctx;
             if (!ctx) return;
-            const w = canvas.width;
-            const h = canvas.height;
+            const dpr = this._dpr || 1;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
             const cx = w / 2;
             const cy = h * 0.36;
 
             const elapsed = now - this._startTime;
             const totalProgress = Math.min(1, elapsed / this._totalDuration);
 
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, w, h);
 
             // Slow counter-rotation for geometric motion
