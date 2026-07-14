@@ -264,6 +264,7 @@
 }
 
 html, body {
+    width: 100%;
     height: 100%;
     overflow: hidden;
     font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -274,9 +275,11 @@ html, body {
 }
 
 #app {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
+    min-height: 100%;
     position: relative;
     max-width: 720px;
     margin: 0 auto;
@@ -325,7 +328,7 @@ html, body {
     flex-direction: column;
     align-items: center;
     padding: 20px 16px calc(var(--nav-height) + 20px);
-    padding-top: calc(20px + max(44px, env(safe-area-inset-top)));
+    padding-top: calc(20px + env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     gap: 16px;
@@ -774,8 +777,10 @@ html, body {
 /* ===== Navigation Bar ===== */
 .nav-bar {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    min-height: var(--nav-height);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--nav-height) + env(safe-area-inset-bottom));
     background: var(--bg-tertiary);
     display: flex;
     align-items: center;
@@ -820,12 +825,11 @@ html, body {
 
 /* ===== Sub Header ===== */
 .sub-header {
-    height: var(--header-height);
+    height: calc(var(--header-height) + env(safe-area-inset-top));
     background: var(--bg-secondary);
     display: flex;
     align-items: center;
-    padding: 0 12px;
-    padding-top: max(44px, env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 12px 0;
     border-bottom: 1px solid rgba(0,0,0,0.15);
     flex-shrink: 0;
     gap: 8px;
