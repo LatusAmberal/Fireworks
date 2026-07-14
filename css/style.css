@@ -345,26 +345,35 @@ html, body {
     justify-content: center;
 }
 
-/* Top row: profile card + right column */
-.home-top-row {
-    display: flex;
-    gap: 12px;
+/* Home Quote (Shakespeare sonnet) */
+.home-quote {
     width: 100%;
     max-width: 540px;
-    align-items: flex-start;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6;
+    cursor: pointer;
     flex-shrink: 0;
-    padding-top: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 20px);
+    transition: opacity 0.2s;
+    word-break: break-word;
+}
+.home-quote:hover { opacity: 0.8; }
+
+/* Profile Card Row (full width) */
+.home-profile-row {
+    width: 100%;
+    max-width: 540px;
+    flex-shrink: 0;
 }
 
-/* Profile Card - 60% */
+/* Profile Card */
 .profile-card {
-    flex: 6;
+    width: 100%;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
     transition: transform 0.3s ease;
-    flex-shrink: 0;
 }
 
 .profile-card-bg {
@@ -431,12 +440,13 @@ html, body {
 }
 .profile-bio:hover { background: var(--bg-hover); }
 
-/* Right column - 40% */
-.home-right-col {
-    flex: 4;
+/* Status + Countdown Row (side by side) */
+.home-status-row {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
+    max-width: 540px;
+    align-items: stretch;
     flex-shrink: 0;
 }
 
@@ -457,7 +467,8 @@ html, body {
 
 /* ===== Status Section ===== */
 .status-section {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: 12px 12px;
@@ -465,7 +476,6 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex-shrink: 0;
 }
 
 .status-row {
@@ -537,12 +547,12 @@ html, body {
 
 /* ===== Countdown Card ===== */
 .countdown-card {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: 12px;
     box-shadow: var(--shadow);
-    flex-shrink: 0;
     text-align: center;
 }
 
@@ -577,7 +587,7 @@ html, body {
     width: 100%;
     max-width: 540px;
     background: transparent;
-    padding: 8px;
+    padding: 10px;
     flex-shrink: 0;
     flex: 1;
 }
