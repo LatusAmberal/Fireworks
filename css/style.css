@@ -44,6 +44,41 @@
     --glass-border: rgba(0,0,0,0.12);
 }
 
+/* Light theme call UI overrides - keep immersive dark for call fullscreen */
+[data-theme="light"] .call-fullscreen {
+    background: #1a1a1a;
+}
+[data-theme="light"] .call-fullscreen .call-full-header span:first-child,
+[data-theme="light"] .call-fullscreen .call-full-type,
+[data-theme="light"] .call-fullscreen .call-full-timer,
+[data-theme="light"] .call-fullscreen .call-minimize-btn {
+    color: white;
+}
+[data-theme="light"] .call-fullscreen .call-minimize-btn {
+    background: rgba(255,255,255,0.15);
+}
+[data-theme="light"] .call-fullscreen .call-ripple {
+    border-color: rgba(255,255,255,0.3);
+}
+[data-theme="light"] .call-fullscreen .call-ripple::before,
+[data-theme="light"] .call-fullscreen .call-ripple::after {
+    border-color: rgba(255,255,255,0.2);
+}
+[data-theme="light"] .call-float-timer {
+    background: rgba(0,0,0,0.75);
+    color: white;
+}
+[data-theme="light"] .call-float-ball {
+    box-shadow: 0 4px 16px rgba(88,101,242,0.6), 0 2px 6px rgba(0,0,0,0.2);
+}
+[data-theme="light"] .call-float-ball {
+    animation: callPulseLight 2s infinite;
+}
+@keyframes callPulseLight {
+    0%, 100% { box-shadow: 0 4px 16px rgba(88,101,242,0.6), 0 2px 6px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 4px 24px rgba(88,101,242,0.9), 0 2px 8px rgba(0,0,0,0.3); }
+}
+
 /* Ocean theme */
 [data-theme="ocean"] {
     --bg-primary: #1a2332;
@@ -1733,15 +1768,49 @@ html, body {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     background: var(--bg-tertiary);
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 6px;
+    flex-wrap: wrap;
     border-top: 1px solid rgba(0,0,0,0.2);
     z-index: 50;
 }
 .multi-select-bar span { color: var(--text-secondary); font-size: 14px; }
+
+/* ===== Group Picker Modal ===== */
+.group-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+}
+.group-picker-item {
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: background 0.15s;
+    text-align: center;
+}
+.group-picker-item:hover {
+    background: var(--blurple);
+    color: #fff;
+}
+.group-picker-item:last-child {
+    margin-top: 4px;
+    border: 1px dashed var(--text-muted);
+    background: transparent;
+    color: var(--text-muted);
+}
+.group-picker-item:last-child:hover {
+    border-color: var(--blurple);
+    background: rgba(88, 101, 242, 0.1);
+    color: var(--blurple);
+}
 
 /* ===== Modal ===== */
 .modal-overlay {
@@ -3122,7 +3191,7 @@ input[type="number"] {
 }
 .call-float-timer {
     font-size: 11px;
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
     background: var(--bg-tertiary);
     padding: 2px 8px;
@@ -3194,4 +3263,156 @@ input[type="number"] {
     max-width: 80%;
     line-height: 1.4;
     border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* ===== Onboarding Screens (Registration + Splash) ===== */
+.onboard-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #202225;
+}
+.onboard-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, #2f3136 0%, #202225 70%);
+    z-index: 0;
+}
+.onboard-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 32px;
+    max-width: 360px;
+    width: 100%;
+}
+.onboard-logo {
+    font-size: 56px;
+    margin-bottom: 16px;
+    opacity: 0.9;
+}
+.onboard-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+.onboard-subtitle {
+    font-size: 14px;
+    color: #b9bbbe;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.register-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #40444b;
+    border-radius: 8px;
+    background: #40444b;
+    color: #dcddde;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    box-sizing: border-box;
+}
+.register-input::placeholder {
+    color: #72767d;
+}
+.register-input:focus {
+    border-color: #5865f2;
+    background: #36393f;
+}
+.register-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #5865f2;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 4px;
+}
+.register-btn:hover {
+    background: #4752c4;
+}
+.register-btn:active {
+    transform: scale(0.98);
+}
+.register-hint {
+    font-size: 12px;
+    color: #72767d;
+    margin-top: 16px;
+}
+
+/* ===== Splash Animation ===== */
+.splash-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.splash-content {
+    position: absolute;
+    bottom: 15vh;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    text-align: center;
+    padding: 0 32px;
+}
+.splash-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: splashTitleAppear 1s ease-out 0.5s forwards;
+}
+@keyframes splashTitleAppear {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.splash-poem {
+    font-size: 12px;
+    color: #72767d;
+    margin-top: 10px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: splashPoemAppear 1s ease-out 1.2s forwards;
+}
+@keyframes splashPoemAppear {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 0.8; transform: translateY(0); }
+}
+
+/* Fade out animation for onboard screens */
+.onboard-screen.fade-out {
+    animation: onboardFadeOut 0.5s ease-out forwards;
+}
+@keyframes onboardFadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; pointer-events: none; }
+}
+
+/* Mobile adjustments for onboarding */
+@media (max-width: 480px) {
+    .onboard-title { font-size: 28px; }
+    .splash-title { font-size: 28px; }
+    .onboard-logo svg { width: 60px; height: 60px; }
+    .register-input { font-size: 16px; padding: 11px 14px; }
 }
