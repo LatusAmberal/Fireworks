@@ -214,7 +214,9 @@ const Settings = {
             sysOpt.addEventListener('click', () => {
                 Data.updateSettings({ theme: 'system' });
                 App.applyTheme();
-                this.renderTab('appearance');
+                // Update active states without full re-render
+                document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                sysOpt.classList.add('active');
             });
         }
 
@@ -437,7 +439,7 @@ const Settings = {
                         <div class="setting-label">\u81EA\u5DF1\u72B6\u6001\u6587\u5B57</div>
                         <div class="setting-desc">\u72B6\u6001\u680F\u81EA\u5DF1\u7684\u5728\u7EBF\u72B6\u6001</div>
                     </div>
-                    <input type="text" id="textMyStatus" value="\u5728\u7EBF" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
+                    <input type="text" id="textMyStatus" value="${Utils.escapeAttr(profile.myStatus || '\u5728\u7EBF')}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
                 </div>
                 <div class="setting-item">
                     <div>
@@ -485,7 +487,7 @@ const Settings = {
             'textLocation': { fn: (v) => Data.updateProfile({ location: v }) },
             'textWeather': { fn: (v) => Data.updateProfile({ weather: v }) },
             'textAnniversaryLabel': { fn: (v) => Data.updateProfile({ anniversaryLabel: v }) },
-            'textMyStatus': {},
+            'textMyStatus': { fn: (v) => Data.updateProfile({ myStatus: v }) },
             'textPeerNickname': { fn: (v) => Data.updatePeer({ nickname: v }) },
             'textMusicTitle': {
                 fn: (v) => {
@@ -508,7 +510,24 @@ const Settings = {
         Object.entries(textFields).forEach(([id, config]) => {
             const el = document.getElementById(id);
             if (!el) return;
+
+            // Debounced input event for real-time saving
+            let debounceTimer = null;
+            el.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (config.fn) config.fn(el.value);
+                    if (App.currentPage === 'home') {
+                        Home.render();
+                        Home.renderMusicPlayer();
+                        Home.renderCountdown();
+                    }
+                }, 500);
+            });
+
+            // Change event for immediate save on blur
             el.addEventListener('change', () => {
+                clearTimeout(debounceTimer);
                 if (config.fn) config.fn(el.value);
                 if (App.currentPage === 'home') {
                     Home.render();
@@ -516,12 +535,6 @@ const Settings = {
                     Home.renderCountdown();
                 }
             });
-        });
-
-        // My status text
-        document.getElementById('textMyStatus').addEventListener('change', (e) => {
-            const el = document.getElementById('myStatusText');
-            if (el) el.textContent = e.target.value || '\u5728\u7EBF';
         });
 
         // Real weather toggle
