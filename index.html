@@ -87,9 +87,11 @@
         <div id="page-home" class="page active">
             <div class="home-bg" id="homeBg"></div>
             <div class="home-content">
-                <!-- Top row: Profile Card (60%) + Status+Countdown column (40%) -->
-                <div class="home-top-row">
-                    <!-- Profile Card -->
+                <!-- Quote (Shakespeare sonnet) -->
+                <div class="home-quote" id="homeQuote">I have crossed oceans of time to find you.</div>
+
+                <!-- Profile Card (full width) -->
+                <div class="home-profile-row">
                     <div class="profile-card" id="profileCard">
                         <div class="profile-card-bg" id="profileCardBg"></div>
                         <div class="profile-card-body">
@@ -100,11 +102,12 @@
                             <div class="profile-bio" id="profileBio"></div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Right column: Status + Countdown -->
-                    <div class="home-right-col">
-                        <!-- Status Section -->
-                        <div class="status-section" id="statusSection">
+                <!-- Status + Countdown (side by side) -->
+                <div class="home-status-row">
+                    <!-- Status Section -->
+                    <div class="status-section" id="statusSection">
                             <div class="status-row">
                                 <div class="status-avatar" id="myStatusAvatar"></div>
                                 <div class="status-info">
@@ -157,7 +160,6 @@
                             <div class="countdown-number" id="countdownNumber">--</div>
                             <div class="countdown-sub" id="countdownSub"></div>
                         </div>
-                    </div>
                 </div>
 
                 <!-- Photo Wall + Music Player Row -->
