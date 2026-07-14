@@ -8,6 +8,7 @@ const defaultData = {
         avatarEmoji: '\uD83C\uDF86',
         background: '',
         nickname: 'sparkle',
+        registered: false,
         bio: '\u5728\u8FD9\u91CC\uFF0C\u6BCF\u4E00\u6761\u6D88\u606F\u90FD\u662F\u4E00\u573A\u70DF\u82B1',
         location: 'Shanghai',
         weather: 'Sunny 25\u00B0C',
@@ -40,25 +41,24 @@ const defaultData = {
         wifiLevel: 65
     },
     groups: [
-        { id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' },
-        { id: 'default', name: '\u672A\u5206\u7EC4' }
+        { id: 'preset', name: '预设分组' }
     ],
     cards: [
-        { id: 'c1', content: '\u4F60\u597D\u5440\uFF01', translation: '\u4F60\u597D\u5440\uFF01', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c2', content: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', translation: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c3', content: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', translation: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c4', content: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48\uFF1F', translation: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c5', content: '\u597D\u4E45\u4E0D\u89C1\uFF01', translation: '\u597D\u4E45\u4E0D\u89C1\uFF01', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c6', content: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', translation: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c7', content: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', translation: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c8', content: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', translation: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c9', content: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', translation: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c10', content: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', translation: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c11', content: '\u539F\u6765\u5982\u6B64', translation: '\u539F\u6765\u5982\u6B64', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c12', content: '\u55EF\u55EF\uFF0C\u7136\u540E\u5462\uFF1F', translation: '\u55EF\u55EF\u7136\u540E\u5462', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c13', content: '\u54C7\uFF0C\u597D\u5389\u5BB3\uFF01', translation: '\u54C7\u597D\u5389\u5BB3', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c14', content: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', translation: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c15', content: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', translation: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', group: 'preset', blocked: false, usageCount: 0 }
+        { id: 'c1', content: 'Hello there!', translation: '你好呀！', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c2', content: 'How was your day?', translation: '今天过得怎么样？', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c3', content: 'Good night, sweet dreams', translation: '晚安，做个好梦', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c4', content: 'What did you have for lunch?', translation: '中午吃了什么？', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c5', content: 'Long time no see!', translation: '好久不见！', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c6', content: 'Hahaha, that is hilarious', translation: '哈哈哈太搞笑了', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c7', content: 'That is exactly what I think', translation: '我也是这么想的', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c8', content: 'That is just outrageous', translation: '这也太离谱了吧', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c9', content: 'You make a good point', translation: '你说的有道理', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c10', content: 'I am listening, go on', translation: '我在听，继续说', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c11', content: 'I see', translation: '原来如此', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c12', content: 'Yeah, and then?', translation: '嗯嗯，然后呢？', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c13', content: 'Wow, that is amazing!', translation: '哇，好厉害！', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c14', content: 'Let us cheer each other on', translation: '我们一起加油吧', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c15', content: 'Do not forget to rest', translation: '别忘了休息哦', group: 'preset', blocked: false, usageCount: 0 }
     ],
     messages: [],
     firstChatDate: null,
@@ -131,6 +131,8 @@ const defaultData = {
             artist: '\u5F0B\u67AB',
             isPlaying: false
         },
+        splashTitle: 'Sonnet',
+        splashSubtitle: 'Shall I compare thee to a summer\'s day?\nThou art more lovely and more temperate.',
         patSettings: {
             enabled: true,
             patText: '\u62CD\u4E86\u62CD',
@@ -290,6 +292,47 @@ const Data = {
             this.data._migratedPreset = true;
             this.save();
         }
+
+        // Migration: swap card content/translation (content=English, translation=Chinese)
+        if (!this.data._migratedCardSwap) {
+            const presetMap = {
+                'c1': { content: 'Hello there!', translation: '你好呀！' },
+                'c2': { content: 'How was your day?', translation: '今天过得怎么样？' },
+                'c3': { content: 'Good night, sweet dreams', translation: '晚安，做个好梦' },
+                'c4': { content: 'What did you have for lunch?', translation: '中午吃了什么？' },
+                'c5': { content: 'Long time no see!', translation: '好久不见！' },
+                'c6': { content: 'Hahaha, that is hilarious', translation: '哈哈哈太搞笑了' },
+                'c7': { content: 'That is exactly what I think', translation: '我也是这么想的' },
+                'c8': { content: 'That is just outrageous', translation: '这也太离谱了吧' },
+                'c9': { content: 'You make a good point', translation: '你说的有道理' },
+                'c10': { content: 'I am listening, go on', translation: '我在听，继续说' },
+                'c11': { content: 'I see', translation: '原来如此' },
+                'c12': { content: 'Yeah, and then?', translation: '嗯嗯，然后呢？' },
+                'c13': { content: 'Wow, that is amazing!', translation: '哇，好厉害！' },
+                'c14': { content: 'Let us cheer each other on', translation: '我们一起加油吧' },
+                'c15': { content: 'Do not forget to rest', translation: '别忘了休息哦' }
+            };
+            this.data.cards.forEach(c => {
+                if (presetMap[c.id]) {
+                    c.content = presetMap[c.id].content;
+                    c.translation = presetMap[c.id].translation;
+                } else if (c.translation && c.content !== c.translation) {
+                    // Swap content and translation for user cards
+                    const tmp = c.content;
+                    c.content = c.translation;
+                    c.translation = tmp;
+                }
+            });
+            this.data._migratedCardSwap = true;
+            this.save();
+        }
+
+        // Migration: remove 'default' group from groups array (keep as virtual)
+        if (!this.data._migratedDefaultGroup) {
+            this.data.groups = this.data.groups.filter(g => g.id !== 'default');
+            this.data._migratedDefaultGroup = true;
+            this.save();
+        }
     },
 
     save() {
@@ -332,10 +375,10 @@ const Data = {
         if (g) { g.name = name; this.save(); }
     },
     deleteGroup(id) {
-        if (id === 'default') return false;
+        if (id === 'preset' || id === 'default') return false;
         this.data.groups = this.data.groups.filter(g => g.id !== id);
         this.data.cards.forEach(c => {
-            if (c.group === id) c.group = 'default';
+            if (c.group === id) c.group = null;
         });
         this.save();
         return true;
@@ -345,6 +388,10 @@ const Data = {
     getCards() { return this.data.cards; },
     getCardsByGroup(groupId) {
         if (groupId === 'all' || !groupId) return this.data.cards;
+        if (groupId === 'default') {
+            const validIds = new Set(this.data.groups.map(g => g.id));
+            return this.data.cards.filter(c => !c.group || !validIds.has(c.group));
+        }
         return this.data.cards.filter(c => c.group === groupId);
     },
     getActiveCards() {
@@ -353,10 +400,14 @@ const Data = {
     getActiveCardsByGroup(groupId) {
         const cards = this.getActiveCards();
         if (!groupId || groupId === 'all') return cards;
+        if (groupId === 'default') {
+            const validIds = new Set(this.data.groups.map(g => g.id));
+            return cards.filter(c => !c.group || !validIds.has(c.group));
+        }
         return cards.filter(c => c.group === groupId);
     },
     addCards(contents, group) {
-        const targetGroup = group || 'default';
+        const targetGroup = group || null;
         contents.forEach(line => {
             let content = line.trim();
             if (!content) return;
@@ -406,6 +457,13 @@ const Data = {
         const idSet = new Set(ids);
         this.data.cards.forEach(c => {
             if (idSet.has(c.id)) c.blocked = blocked;
+        });
+        this.save();
+    },
+    moveCardsToGroup(ids, groupId) {
+        const idSet = new Set(ids);
+        this.data.cards.forEach(c => {
+            if (idSet.has(c.id)) c.group = groupId;
         });
         this.save();
     },
@@ -679,7 +737,7 @@ const Data = {
         let txt = '# Fireworks \u5B57\u5361\u5E93\u5BFC\u51FA\n';
         txt += '# \u683C\u5F0F\u8BF4\u660E\uFF1A\u6BCF\u884C\u4E00\u6761\u5B57\u5361\uFF0C{{}}\u5185\u4E3A\u7FFB\u8BD1\n\n';
         this.data.cards.forEach(c => {
-            const groupName = (this.data.groups.find(g => g.id === c.group) || {}).name || '\u9ED8\u8BA4\u5206\u7EC4';
+            const groupName = (this.data.groups.find(g => g.id === c.group) || {}).name || '未分组';
             txt += `[${groupName}] ${c.content}`;
             if (c.translation) txt += ` {{${c.translation}}}`;
             txt += '\n';
@@ -693,7 +751,7 @@ const Data = {
             let trimmed = line.trim();
             if (!trimmed || trimmed.startsWith('#')) return;
 
-            let cardGroup = 'default';
+            let cardGroup = null;
             const groupMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)/);
             if (groupMatch) {
                 const groupName = groupMatch[1].trim();
