@@ -141,9 +141,8 @@ const Chat = {
                 const profile = Data.getProfile();
                 const myName = profile.nickname || 'sparkle';
                 const peerName = peer.nickname || 'shimmer';
-                const userPatText = patSettings.userPatCustomText || '\u5934';
-                const text = `${peerName} \u62CD\u4E86\u62CD${myName}\u7684${userPatText}`;
-                this.appendPatDivider(text);
+                const text = (patSettings.peerPatPrefix || '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A') + myName;
+                this.appendPatDivider(text, 'other');
                 this.isReplying = false;
                 this.lastSentTimestamp = Date.now();
                 return;
@@ -740,18 +739,17 @@ const Chat = {
         const patSettings = settings.patSettings || {};
         const myName = profile.nickname || 'sparkle';
         const peerName = peer.nickname || 'shimmer';
-        const customText = patSettings.userPatCustomText || '\u5934';
 
         let text;
         if (side === 'me') {
-            // User pats self: {myName}拍了拍{myName}的{customText}
-            text = `${myName} \u62CD\u4E86\u62CD${myName}\u7684${customText}`;
+            // User pats peer: {myName}拍了拍{peerName}的...
+            text = (patSettings.userPatPrefix || '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A') + peerName;
         } else {
-            // User pats peer: {myName}拍了拍{peerName}的{customText}
-            text = `${myName} \u62CD\u4E86\u62CD${peerName}\u7684${customText}`;
+            // User pats self (double-click own avatar): {myName}拍了拍{myName}的...
+            text = '\u4F60\u62CD\u4E86\u62CD\u81EA\u5DF1\u7684\uFF1A' + myName;
         }
 
-        this.appendPatDivider(text);
+        this.appendPatDivider(text, side);
 
         // Debounce
         const now = Date.now();
@@ -760,7 +758,7 @@ const Chat = {
         this._patDebounce[key] = now;
     },
 
-    appendPatDivider(text) {
+    appendPatDivider(text, side) {
         const divider = document.createElement('div');
         divider.className = 'pat-divider';
         const span = document.createElement('span');
@@ -768,6 +766,17 @@ const Chat = {
         divider.appendChild(span);
         this.messagesContainer.appendChild(divider);
         this.scrollToBottom();
+
+        // Save to messages for persistence
+        const msg = {
+            id: 'pat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            isPatDivider: true,
+            text: text,
+            side: side || 'me',
+            timestamp: Date.now()
+        };
+        Data.getMessages().push(msg);
+        Data.save();
     },
 
     appendTimeDivider(ts) {
@@ -802,6 +811,15 @@ const Chat = {
 
         let prevMsg = null;
         messages.forEach(msg => {
+            if (msg.isPatDivider) {
+                const divider = document.createElement('div');
+                divider.className = 'pat-divider';
+                const span = document.createElement('span');
+                span.textContent = msg.text || '';
+                divider.appendChild(span);
+                this.messagesContainer.appendChild(divider);
+                return;
+            }
             if (!prevMsg || Utils.shouldShowTimeDivider(prevMsg.timestamp, msg.timestamp)) {
                 this.appendTimeDivider(msg.timestamp);
             }
@@ -1681,9 +1699,9 @@ const ChatSettings = {
                         <div class="setting-desc">\u5BF9\u65B9\u8F93\u5165\u52A8\u753B\u7684\u65F6\u957F\uFF08\u79D2\uFF09</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px">
-                        <input type="number" id="minDelayInput" value="${peer.minDelay}" min="1" max="30" style="width:50px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="minDelayInput" value="${peer.minDelay}" min="1" style="width:50px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">~</span>
-                        <input type="number" id="maxDelayInput" value="${peer.maxDelay}" min="1" max="30" style="width:50px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="maxDelayInput" value="${peer.maxDelay}" min="1" style="width:50px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">\u79D2</span>
                     </div>
                 </div>
@@ -1693,9 +1711,9 @@ const ChatSettings = {
                         <div class="setting-desc">\u672A\u8BFB\u53D8\u4E3A\u5DF2\u8BFB\u7684\u95F4\u9694\u65F6\u95F4\uFF08\u79D2\uFF09</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px">
-                        <input type="number" id="readDelayMinInput" value="${peer.readDelayMin}" min="0.1" max="10" step="0.1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="readDelayMinInput" value="${peer.readDelayMin}" min="0.1" step="0.1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">~</span>
-                        <input type="number" id="readDelayMaxInput" value="${peer.readDelayMax}" min="0.1" max="10" step="0.1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="readDelayMaxInput" value="${peer.readDelayMax}" min="0.1" step="0.1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">\u79D2</span>
                     </div>
                 </div>
@@ -1714,9 +1732,9 @@ const ChatSettings = {
                         <div class="setting-desc">\u5BF9\u65B9\u4E3B\u52A8\u53D1\u6D88\u606F\u7684\u65F6\u95F4\u8303\u56F4\uFF08\u5206\u949F\uFF09</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px">
-                        <input type="number" id="proactiveMinInput" value="${peer.proactiveMinInterval}" min="1" max="60" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="proactiveMinInput" value="${peer.proactiveMinInterval}" min="1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">~</span>
-                        <input type="number" id="proactiveMaxInput" value="${peer.proactiveMaxInterval}" min="1" max="60" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
+                        <input type="number" id="proactiveMaxInput" value="${peer.proactiveMaxInterval}" min="1" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center">
                         <span style="color:var(--text-muted)">\u5206\u949F</span>
                     </div>
                 </div>
@@ -1768,10 +1786,17 @@ const ChatSettings = {
                 </div>
                 <div class="setting-item" id="patUserTextRow" style="${ps.enabled !== false ? '' : 'display:none'}">
                     <div>
-                        <div class="setting-label">\u62CD\u4E00\u62CD\u6587\u6848</div>
-                        <div class="setting-desc">{\u6635\u79F0}\u62CD\u4E86\u62CD{\u5BF9\u65B9/\u81EA\u5DF1}\u7684\uFF08\u81EA\u5B9A\u4E49\u5185\u5BB9\uFF09</div>
+                        <div class="setting-label">\u81EA\u5DF1\u62CD\u62CD\u6587\u6848</div>
+                        <div class="setting-desc">\u4F60\u53CC\u51FB\u5BF9\u65B9\u5934\u50CF\u65F6\u663E\u793A\u7684\u524D\u7F00\u6587\u6848</div>
                     </div>
-                    <input type="text" id="patUserTextInput" value="${Utils.escapeAttr(ps.userPatCustomText || '\u5934')}" placeholder="\u5934" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:120px" ${ps.enabled !== false ? '' : 'disabled'}>
+                    <input type="text" id="patUserPrefixInput" value="${Utils.escapeAttr(ps.userPatPrefix || '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A')}" placeholder="\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
+                </div>
+                <div class="setting-item" id="patPeerPrefixRow" style="${ps.enabled !== false ? '' : 'display:none'}">
+                    <div>
+                        <div class="setting-label">\u5BF9\u65B9\u62CD\u62CD\u6587\u6848</div>
+                        <div class="setting-desc">\u5BF9\u65B9\u62CD\u4F60\u65F6\u663E\u793A\u7684\u524D\u7F00\u6587\u6848</div>
+                    </div>
+                    <input type="text" id="patPeerPrefixInput" value="${Utils.escapeAttr(ps.peerPatPrefix || '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A')}" placeholder="\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
                 </div>
             </div>
 
@@ -1995,11 +2020,11 @@ const ChatSettings = {
             s.patSettings.enabled = on;
             Data.updateSettings({ patSettings: s.patSettings });
             // Hide/show related rows and disable inputs
-            ['patTriggerRow', 'patUserTextRow'].forEach(id => {
+            ['patTriggerRow', 'patUserTextRow', 'patPeerPrefixRow'].forEach(id => {
                 const row = document.getElementById(id);
                 if (row) row.style.display = on ? '' : 'none';
             });
-            ['patTriggerInput', 'patUserTextInput'].forEach(id => {
+            ['patTriggerInput', 'patUserPrefixInput', 'patPeerPrefixInput'].forEach(id => {
                 const inp = document.getElementById(id);
                 if (inp) inp.disabled = !on;
             });
@@ -2015,10 +2040,17 @@ const ChatSettings = {
             Data.updateSettings({ patSettings: s.patSettings });
         });
 
-        document.getElementById('patUserTextInput').addEventListener('change', (e) => {
+        document.getElementById('patUserPrefixInput').addEventListener('change', (e) => {
             const s = Data.getSettings();
             if (!s.patSettings) s.patSettings = {};
-            s.patSettings.userPatCustomText = e.target.value;
+            s.patSettings.userPatPrefix = e.target.value;
+            Data.updateSettings({ patSettings: s.patSettings });
+        });
+
+        document.getElementById('patPeerPrefixInput').addEventListener('change', (e) => {
+            const s = Data.getSettings();
+            if (!s.patSettings) s.patSettings = {};
+            s.patSettings.peerPatPrefix = e.target.value;
             Data.updateSettings({ patSettings: s.patSettings });
         });
 
