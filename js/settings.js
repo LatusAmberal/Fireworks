@@ -427,6 +427,13 @@ const Settings = {
                     </div>
                     <input type="text" id="textMyStatus" value="${Utils.escapeAttr(profile.myStatus || '\u5728\u7EBF')}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
                 </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u52B1\u5FD7\u8BED\u5F55</div>
+                        <div class="setting-desc">\u540D\u7247\u4E0A\u65B9\u663E\u793A\u7684\u82F1\u8BED\u8BED\u5F55\uFF0C\u53CC\u51FB\u53EF\u5728\u4E3B\u9875\u7F16\u8F91</div>
+                    </div>
+                    <input type="text" id="textHomeQuote" value="${Utils.escapeAttr(s.homeQuote || '')}" placeholder="\u8F93\u5165\u82F1\u8BED\u8BED\u5F55" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:13px;text-align:right;width:180px">
+                </div>
             </div>
 
             <div class="setting-group">
@@ -483,6 +490,7 @@ const Settings = {
             'textBio': { fn: (v) => Data.updateProfile({ bio: v }) },
             'textAnniversaryLabel': { fn: (v) => Data.updateProfile({ anniversaryLabel: v }) },
             'textMyStatus': { fn: (v) => Data.updateProfile({ myStatus: v }) },
+            'textHomeQuote': { fn: (v) => Data.updateSettings({ homeQuote: v }) },
             'textPeerNickname': { fn: (v) => Data.updatePeer({ nickname: v }) },
             'textMusicTitle': {
                 fn: (v) => {
