@@ -220,6 +220,270 @@ const App = {
     }
 };
 
+/* ===== Onboarding: Registration + Splash Animation ===== */
+const Onboarding = {
+    init() {
+        const profile = Data.getProfile();
+        if (!profile.registered) {
+            this.showRegistration();
+        } else {
+            this.showSplash();
+        }
+    },
+
+    showRegistration() {
+        const screen = document.getElementById('register-screen');
+        screen.style.display = 'flex';
+
+        const nicknameInput = document.getElementById('registerNickname');
+        const passwordInput = document.getElementById('registerPassword');
+        const submitBtn = document.getElementById('registerSubmit');
+
+        setTimeout(() => nicknameInput.focus(), 100);
+
+        const handleSubmit = () => {
+            const nickname = nicknameInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!nickname) {
+                nicknameInput.style.borderColor = '#ff5e6c';
+                nicknameInput.focus();
+                setTimeout(() => { nicknameInput.style.borderColor = ''; }, 1500);
+                return;
+            }
+            if (!password) {
+                passwordInput.style.borderColor = '#ff5e6c';
+                passwordInput.focus();
+                setTimeout(() => { passwordInput.style.borderColor = ''; }, 1500);
+                return;
+            }
+
+            Data.updateProfile({ nickname: nickname, registered: true });
+
+            // Pre-load app data immediately while splash is starting
+            this._preloadApp();
+
+            // Apply custom splash text from settings
+            const s = Data.getSettings();
+            const titleEl = document.getElementById('splashTitle');
+            const poemEl = document.getElementById('splashPoem');
+            if (titleEl) titleEl.textContent = s.splashTitle || 'Sonnet';
+            if (poemEl) {
+                const subtitle = (s.splashSubtitle || 'Shall I compare thee to a summer\'s day?\nThou art more lovely and more temperate.');
+                poemEl.innerHTML = subtitle.replace(/\n/g, '<br>');
+            }
+
+            // Cross-fade: start splash behind registration screen, then fade out registration
+            const splash = document.getElementById('splash-screen');
+            splash.style.display = 'flex';
+            this.startAnimation();
+
+            // Fade out registration screen on top of splash
+            screen.classList.add('fade-out');
+            setTimeout(() => {
+                screen.style.display = 'none';
+                screen.classList.remove('fade-out');
+            }, 500);
+        };
+
+        submitBtn.addEventListener('click', handleSubmit);
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSubmit();
+        });
+        nicknameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') passwordInput.focus();
+        });
+    },
+
+    showSplash() {
+        const regScreen = document.getElementById('register-screen');
+        if (regScreen) regScreen.style.display = 'none';
+
+        // Apply custom splash text from settings
+        const s = Data.getSettings();
+        const titleEl = document.getElementById('splashTitle');
+        const poemEl = document.getElementById('splashPoem');
+        if (titleEl) titleEl.textContent = s.splashTitle || 'Sonnet';
+        if (poemEl) {
+            const subtitle = (s.splashSubtitle || 'Shall I compare thee to a summer\'s day?\nThou art more lovely and more temperate.');
+            poemEl.innerHTML = subtitle.replace(/\n/g, '<br>');
+        }
+
+        const screen = document.getElementById('splash-screen');
+        screen.style.display = 'flex';
+
+        this.startAnimation();
+
+        // Pre-load app data during animation (after a brief delay for canvas to start)
+        this._preloadApp();
+    },
+
+    // Pre-load all app data and initialize modules during splash animation
+    _appPreloaded: false,
+    _preloadApp() {
+        if (this._appPreloaded) return;
+        this._appPreloaded = true;
+
+        // Use requestAnimationFrame to ensure canvas is painting, then init app
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                App.init();
+            }, 100);
+        });
+    },
+
+    // ===== Geometric Firework Animation =====
+    _canvas: null,
+    _ctx: null,
+    _animId: null,
+    _resizeHandler: null,
+    _startTime: 0,
+    _totalDuration: 3000,
+
+    startAnimation() {
+        const canvas = document.getElementById('splash-canvas');
+        if (!canvas) return;
+        this._canvas = canvas;
+        this._ctx = canvas.getContext('2d');
+        this._startTime = performance.now();
+
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        resize();
+        this._resizeHandler = resize;
+        window.addEventListener('resize', resize);
+
+        const animate = (now) => {
+            const ctx = this._ctx;
+            if (!ctx) return;
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h * 0.36;
+
+            const elapsed = now - this._startTime;
+            const totalProgress = Math.min(1, elapsed / this._totalDuration);
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Slow counter-rotation for geometric motion
+            const rotation = now * 0.0003;
+
+            // ===== Two concentric progress rings =====
+            const outerR = Math.min(85, w * 0.12);
+            const innerR = outerR * 0.6;
+
+            // --- Outer ring: 20 segments, larger squares, clockwise ---
+            const outerSegs = 20;
+            const outerSize = 6;
+            const outerLit = Math.floor(totalProgress * outerSegs);
+            const outerPulse = 0.85 + Math.sin(now * 0.004) * 0.1;
+
+            for (let i = 0; i < outerSegs; i++) {
+                const a = (Math.PI * 2 * i) / outerSegs - Math.PI / 2 + rotation;
+                const sx = cx + Math.cos(a) * outerR;
+                const sy = cy + Math.sin(a) * outerR;
+
+                const isLit = i < outerLit;
+                const isNext = i === outerLit && totalProgress < 1;
+                const partial = isNext ? (totalProgress * outerSegs - outerLit) : 0;
+
+                ctx.save();
+                ctx.translate(sx, sy);
+                ctx.rotate(a + Math.PI / 2);
+
+                if (isLit) {
+                    ctx.fillStyle = `rgba(88, 101, 242, ${outerPulse})`;
+                    ctx.fillRect(-outerSize / 2, -outerSize / 2, outerSize, outerSize);
+                } else if (isNext) {
+                    ctx.fillStyle = `rgba(88, 101, 242, ${0.85 * partial})`;
+                    const ds = outerSize * partial;
+                    ctx.fillRect(-ds / 2, -outerSize / 2, ds, outerSize);
+                } else {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.fillRect(-outerSize / 2, -outerSize / 2, outerSize, outerSize);
+                }
+                ctx.restore();
+            }
+
+            // --- Inner ring: 16 segments, counter-clockwise ---
+            const innerSegs = 16;
+            const innerSize = 5;
+            const innerLit = Math.floor(totalProgress * innerSegs);
+            const innerPulse = 0.7 + Math.sin(now * 0.004 + 1) * 0.1;
+
+            for (let i = 0; i < innerSegs; i++) {
+                const a = (Math.PI * 2 * i) / innerSegs - Math.PI / 2 - rotation;
+                const sx = cx + Math.cos(a) * innerR;
+                const sy = cy + Math.sin(a) * innerR;
+
+                const isLit = i < innerLit;
+                const isNext = i === innerLit && totalProgress < 1;
+                const partial = isNext ? (totalProgress * innerSegs - innerLit) : 0;
+
+                ctx.save();
+                ctx.translate(sx, sy);
+                ctx.rotate(a + Math.PI / 2);
+
+                if (isLit) {
+                    ctx.fillStyle = `rgba(88, 101, 242, ${innerPulse})`;
+                    ctx.fillRect(-innerSize / 2, -innerSize / 2, innerSize, innerSize);
+                } else if (isNext) {
+                    ctx.fillStyle = `rgba(88, 101, 242, ${0.7 * partial})`;
+                    const ds = innerSize * partial;
+                    ctx.fillRect(-ds / 2, -innerSize / 2, ds, innerSize);
+                } else {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.fillRect(-innerSize / 2, -innerSize / 2, innerSize, innerSize);
+                }
+                ctx.restore();
+            }
+
+            // ===== Central pulsing white circle =====
+            const pulseCycle = Math.sin(now * 0.0015);
+            const circleRadius = 10 + pulseCycle * 6;
+            const circleAlpha = 0.15 + (pulseCycle + 1) * 0.1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, circleRadius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${circleAlpha})`;
+            ctx.fill();
+
+            this._animId = requestAnimationFrame(animate);
+        };
+        this._animId = requestAnimationFrame(animate);
+
+        // Schedule splash screen removal
+        setTimeout(() => {
+            const screen = document.getElementById('splash-screen');
+            screen.classList.add('fade-out');
+            setTimeout(() => {
+                screen.style.display = 'none';
+                screen.classList.remove('fade-out');
+                this.stopAnimation();
+                // App.init() is already called during animation via _preloadApp()
+                // Ensure it's initialized even if _preloadApp failed
+                if (!this._appPreloaded) {
+                    App.init();
+                }
+            }, 500);
+        }, this._totalDuration);
+    },
+
+    stopAnimation() {
+        if (this._animId) {
+            cancelAnimationFrame(this._animId);
+            this._animId = null;
+        }
+        if (this._resizeHandler) {
+            window.removeEventListener('resize', this._resizeHandler);
+            this._resizeHandler = null;
+        }
+        this._canvas = null;
+        this._ctx = null;
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    App.init();
+    Onboarding.init();
 });
