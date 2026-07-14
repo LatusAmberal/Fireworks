@@ -216,6 +216,10 @@ const Chat = {
 
     showTypingIndicator() {
         this.hideTypingIndicator();
+
+        // Auto-mark all unread messages as read when peer starts typing
+        this._markUnreadAsRead();
+
         const indicator = document.createElement('div');
         indicator.className = 'typing-indicator';
         indicator.id = 'typingIndicator';
@@ -247,6 +251,19 @@ const Chat = {
     hideTypingIndicator() {
         const existing = document.getElementById('typingIndicator');
         if (existing) existing.remove();
+    },
+
+    _markUnreadAsRead() {
+        const messages = Data.getMessages();
+        let changed = false;
+        messages.forEach(msg => {
+            if (msg.side === 'me' && msg.read === false) {
+                msg.read = true;
+                changed = true;
+                this.updateReadStatus(msg.id);
+            }
+        });
+        if (changed) Data.save();
     },
 
     appendMessage(msg, animate = false) {
@@ -1543,9 +1560,9 @@ const Chat = {
 
     _getThemeColor1() {
         const themes = {
-            dark: '#36393f', light: '#ffffff', ocean: '#1a2332',
+            dark: '#36393f', light: '#2f3136', ocean: '#1a2332',
             sunset: '#2d1b2e', forest: '#1e2a1e', rust: '#1a1214',
-            monochrome: '#ffffff', morandi: '#e8e0d8', matcha: '#f4f7f0', sakura: '#fdf5f6'
+            monochrome: '#2f3136', morandi: '#e8e0d8', matcha: '#f4f7f0', sakura: '#fdf5f6'
         };
         const theme = Data.getSettings().theme || 'dark';
         return themes[theme] || '#36393f';
@@ -1553,9 +1570,9 @@ const Chat = {
 
     _getThemeColor2() {
         const themes = {
-            dark: '#2f3136', light: '#f2f3f5', ocean: '#1e2d3f',
+            dark: '#2f3136', light: '#36393f', ocean: '#1e2d3f',
             sunset: '#3a2540', forest: '#283828', rust: '#24181a',
-            monochrome: '#f8f8f8', morandi: '#dfd6ce', matcha: '#edf2e8', sakura: '#fbeff1'
+            monochrome: '#36393f', morandi: '#dfd6ce', matcha: '#edf2e8', sakura: '#fbeff1'
         };
         const theme = Data.getSettings().theme || 'dark';
         return themes[theme] || '#2f3136';
