@@ -456,6 +456,24 @@ const Settings = {
                 </div>
             </div>
 
+            <div class="setting-group">
+                <div class="setting-group-title">\u5F00\u573A\u52A8\u753B\u6587\u5B57</div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u52A8\u753B\u6807\u9898</div>
+                        <div class="setting-desc">\u5F00\u573A\u52A8\u753B\u4E2D\u592E\u663E\u793A\u7684\u5927\u6807\u9898</div>
+                    </div>
+                    <input type="text" id="textSplashTitle" value="${Utils.escapeAttr(s.splashTitle || 'Sonnet')}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:150px">
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u52A8\u753B\u526F\u6807\u9898</div>
+                        <div class="setting-desc">\u6807\u9898\u4E0B\u65B9\u7684\u5C0F\u5B57\uFF0C\u652F\u6301\u6362\u884C</div>
+                    </div>
+                    <textarea id="textSplashSubtitle" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:13px;width:180px;min-height:50px;resize:vertical;text-align:right">${Utils.escapeHtml(s.splashSubtitle || 'Shall I compare thee to a summer\'s day?\nThou art more lovely and more temperate.')}</textarea>
+                </div>
+            </div>
+
         `;
     },
 
@@ -481,7 +499,9 @@ const Settings = {
                     s.musicPlayer.artist = v;
                     Data.updateSettings({ musicPlayer: s.musicPlayer });
                 }
-            }
+            },
+            'textSplashTitle': { fn: (v) => Data.updateSettings({ splashTitle: v }) },
+            'textSplashSubtitle': { fn: (v) => Data.updateSettings({ splashSubtitle: v }) }
         };
 
         Object.entries(textFields).forEach(([id, config]) => {
