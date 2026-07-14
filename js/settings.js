@@ -415,20 +415,6 @@ const Settings = {
                 </div>
                 <div class="setting-item">
                     <div>
-                        <div class="setting-label">\u4F4D\u7F6E</div>
-                        <div class="setting-desc">\u7528\u6237\u5730\u533A\u663E\u793A</div>
-                    </div>
-                    <input type="text" id="textLocation" value="${Utils.escapeAttr(profile.location)}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
-                </div>
-                <div class="setting-item">
-                    <div>
-                        <div class="setting-label">\u5929\u6C14</div>
-                        <div class="setting-desc">\u7528\u6237\u5929\u6C14\u663E\u793A</div>
-                    </div>
-                    <input type="text" id="textWeather" value="${Utils.escapeAttr(profile.weather)}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
-                </div>
-                <div class="setting-item">
-                    <div>
                         <div class="setting-label">\u7EAA\u5FF5\u65E5\u6807\u9898</div>
                         <div class="setting-desc">\u7EAA\u5FF5\u65E5\u5361\u7247\u4E0A\u65B9\u7684\u6807\u9898\u6587\u5B57</div>
                     </div>
@@ -440,13 +426,6 @@ const Settings = {
                         <div class="setting-desc">\u72B6\u6001\u680F\u81EA\u5DF1\u7684\u5728\u7EBF\u72B6\u6001</div>
                     </div>
                     <input type="text" id="textMyStatus" value="${Utils.escapeAttr(profile.myStatus || '\u5728\u7EBF')}" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:130px">
-                </div>
-                <div class="setting-item">
-                    <div>
-                        <div class="setting-label">\u5B9E\u65F6\u5929\u6C14\u4E0E\u5B9A\u4F4D</div>
-                        <div class="setting-desc">\u6839\u636E\u4F4D\u7F6E\u81EA\u52A8\u83B7\u53D6\u5929\u6C14\u548C\u57CE\u5E02</div>
-                    </div>
-                    <div class="toggle ${profile.useRealWeather ? 'on' : ''}" id="realWeatherToggle"></div>
                 </div>
             </div>
 
@@ -484,8 +463,6 @@ const Settings = {
         const textFields = {
             'textNickname': { fn: (v) => Data.updateProfile({ nickname: v }) },
             'textBio': { fn: (v) => Data.updateProfile({ bio: v }) },
-            'textLocation': { fn: (v) => Data.updateProfile({ location: v }) },
-            'textWeather': { fn: (v) => Data.updateProfile({ weather: v }) },
             'textAnniversaryLabel': { fn: (v) => Data.updateProfile({ anniversaryLabel: v }) },
             'textMyStatus': { fn: (v) => Data.updateProfile({ myStatus: v }) },
             'textPeerNickname': { fn: (v) => Data.updatePeer({ nickname: v }) },
@@ -535,16 +512,6 @@ const Settings = {
                     Home.renderCountdown();
                 }
             });
-        });
-
-        // Real weather toggle
-        document.getElementById('realWeatherToggle').addEventListener('click', (e) => {
-            const on = !e.target.classList.contains('on');
-            e.target.classList.toggle('on', on);
-            Data.updateProfile({ useRealWeather: on });
-            if (on) {
-                if (App.currentPage === 'home') Home.fetchWeather();
-            }
         });
     },
 
