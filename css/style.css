@@ -24,9 +24,9 @@
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --shadow: 0 2px 10px rgba(0,0,0,0.3);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
-    --glass-bg: rgba(47,49,54,0.75);
-    --glass-border: rgba(255,255,255,0.08);
-    --glass-blur: 12px;
+    --glass-bg: rgba(47,49,54,0.55);
+    --glass-border: rgba(255,255,255,0.1);
+    --glass-blur: 16px;
 }
 
 /* Light theme */
@@ -40,8 +40,8 @@
     --text-secondary: #5c6370;
     --text-muted: #949ba4;
     --bubble-other: #e9ebed;
-    --glass-bg: rgba(255,255,255,0.7);
-    --glass-border: rgba(0,0,0,0.06);
+    --glass-bg: rgba(255,255,255,0.5);
+    --glass-border: rgba(0,0,0,0.12);
 }
 
 /* Ocean theme */
@@ -58,8 +58,8 @@
     --blurple-hover: #0096b7;
     --bubble-me: linear-gradient(135deg, #00b4d8, #0077b6);
     --bubble-other: #243b52;
-    --glass-bg: rgba(30,45,63,0.75);
-    --glass-border: rgba(255,255,255,0.06);
+    --glass-bg: rgba(30,45,63,0.55);
+    --glass-border: rgba(255,255,255,0.1);
 }
 
 /* Sunset (彩霞) theme */
@@ -76,8 +76,8 @@
     --blurple-hover: #c0458a;
     --bubble-me: linear-gradient(135deg, #e056a0, #ff6b6b);
     --bubble-other: #3a2540;
-    --glass-bg: rgba(58,37,64,0.75);
-    --glass-border: rgba(255,255,255,0.08);
+    --glass-bg: rgba(58,37,64,0.55);
+    --glass-border: rgba(255,255,255,0.12);
 }
 
 /* Forest theme */
@@ -94,8 +94,8 @@
     --blurple-hover: #388e3c;
     --bubble-me: linear-gradient(135deg, #4caf50, #81c784);
     --bubble-other: #283828;
-    --glass-bg: rgba(40,56,40,0.75);
-    --glass-border: rgba(255,255,255,0.06);
+    --glass-bg: rgba(40,56,40,0.55);
+    --glass-border: rgba(255,255,255,0.1);
 }
 
 /* 红锈 (Rust) theme - red/black tones */
@@ -112,8 +112,8 @@
     --blurple-hover: #a93226;
     --bubble-me: linear-gradient(135deg, #c0392b, #e74c3c);
     --bubble-other: #24181a;
-    --glass-bg: rgba(36,24,26,0.75);
-    --glass-border: rgba(255,255,255,0.08);
+    --glass-bg: rgba(36,24,26,0.55);
+    --glass-border: rgba(255,255,255,0.12);
 }
 
 /* Monochrome theme - minimalist B&W */
@@ -133,8 +133,8 @@
     --yellow: #777777;
     --bubble-me: #1a1a1a;
     --bubble-other: #f0f0f0;
-    --glass-bg: rgba(255,255,255,0.85);
-    --glass-border: rgba(0,0,0,0.06);
+    --glass-bg: rgba(255,255,255,0.65);
+    --glass-border: rgba(0,0,0,0.1);
 }
 
 /* Morandi theme */
@@ -151,8 +151,8 @@
     --blurple-hover: #6d5a43;
     --bubble-me: linear-gradient(135deg, #8b7355, #a08464);
     --bubble-other: #d4ccc5;
-    --glass-bg: rgba(232,224,216,0.75);
-    --glass-border: rgba(74,63,53,0.08);
+    --glass-bg: rgba(232,224,216,0.55);
+    --glass-border: rgba(74,63,53,0.12);
 }
 
 /* Matcha theme - light green */
@@ -169,8 +169,8 @@
     --blurple-hover: #557548;
     --bubble-me: linear-gradient(135deg, #6b8f5e, #8aaa7a);
     --bubble-other: #e8eee5;
-    --glass-bg: rgba(244,247,240,0.75);
-    --glass-border: rgba(58,74,48,0.08);
+    --glass-bg: rgba(244,247,240,0.55);
+    --glass-border: rgba(58,74,48,0.12);
 }
 
 /* Sakura theme - light pink */
@@ -187,8 +187,8 @@
     --blurple-hover: #b06d74;
     --bubble-me: linear-gradient(135deg, #d4878e, #e8a8ae);
     --bubble-other: #f8eeef;
-    --glass-bg: rgba(253,245,246,0.75);
-    --glass-border: rgba(90,58,64,0.08);
+    --glass-bg: rgba(253,245,246,0.55);
+    --glass-border: rgba(90,58,64,0.12);
 }
 
 /* Glassmorphism mode */
@@ -203,11 +203,21 @@
 [data-glass="true"] .cards-tab-bar,
 [data-glass="true"] .cards-group-bar,
 [data-glass="true"] .settings-tabs,
-[data-glass="true"] .nav-bar {
+[data-glass="true"] .nav-bar,
+[data-glass="true"] .music-player {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Disable transitions during theme switch (prevents mobile lag) */
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+    transition: none !important;
+    animation: none !important;
 }
 
 /* ===== Reset ===== */
