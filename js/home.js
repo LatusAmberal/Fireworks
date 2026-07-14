@@ -140,15 +140,19 @@ const Home = {
                 break;
             case 'bio':
                 Data.updateProfile({ bio: value });
+                this.render();
                 break;
             case 'location':
                 Data.updateProfile({ location: value });
+                this.render();
                 break;
             case 'weather':
                 Data.updateProfile({ weather: value });
+                this.render();
                 break;
             case 'myStatus':
-                document.getElementById('myStatusText').textContent = value || '\u5728\u7EBF';
+                Data.updateProfile({ myStatus: value });
+                this.renderStatusSection();
                 break;
             case 'myStatusName':
                 Data.updateProfile({ nickname: value });
@@ -252,6 +256,9 @@ const Home = {
 
         const otherStatus = document.getElementById('otherStatusText');
         if (otherStatus) otherStatus.textContent = peer.currentStatus || '...';
+
+        const myStatus = document.getElementById('myStatusText');
+        if (myStatus) myStatus.textContent = profile.myStatus || '\u5728\u7EBF';
 
         this.updateMyBattery();
         this.updateOtherBattery();
