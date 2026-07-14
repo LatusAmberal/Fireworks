@@ -125,15 +125,7 @@ const App = {
         if (theme === 'system') {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         }
-        // Disable transitions during theme switch to prevent mobile lag
-        document.documentElement.classList.add('theme-transitioning');
         document.documentElement.setAttribute('data-theme', theme);
-        // Force reflow then re-enable transitions
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                document.documentElement.classList.remove('theme-transitioning');
-            });
-        });
     },
 
     applyGlassmorphism() {
