@@ -26,10 +26,14 @@ const Home = {
     render() {
         const profile = Data.getProfile();
         const peer = Data.getPeer();
+        const s = Data.getSettings();
 
         document.getElementById('profileNickname').textContent = profile.nickname || 'sparkle';
         document.getElementById('profileBio').textContent = profile.bio || '';
         document.getElementById('myStatusName').textContent = profile.nickname || 'sparkle';
+
+        const quoteEl = document.getElementById('homeQuote');
+        if (quoteEl) quoteEl.textContent = s.homeQuote || 'So long as men can breathe or eyes can see, So long lives this, and this gives life to thee.';
 
         this.renderStatusSection();
     },
@@ -65,6 +69,13 @@ const Home = {
             e.stopPropagation();
             this.showInlineEdit(document.getElementById('otherStatusName'), 'otherStatusName');
         });
+
+        const quoteEl = document.getElementById('homeQuote');
+        if (quoteEl) {
+            quoteEl.addEventListener('dblclick', () => {
+                this.showInlineEdit(quoteEl, 'homeQuote');
+            });
+        }
 
         inlineInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -106,7 +117,7 @@ const Home = {
         // For photo date, handled separately
         if (field === 'photoDate') return;
 
-        if (!value && field !== 'myStatus' && field !== 'countdownLabel') return;
+        if (!value && field !== 'myStatus' && field !== 'countdownLabel' && field !== 'homeQuote') return;
 
         switch (field) {
             case 'nickname':
@@ -144,6 +155,11 @@ const Home = {
                 break;
             case 'musicArtist':
                 this.updateMusicInfo('artist', value);
+                break;
+            case 'homeQuote':
+                Data.updateSettings({ homeQuote: value });
+                const qEl = document.getElementById('homeQuote');
+                if (qEl) qEl.textContent = value || 'So long as men can breathe or eyes can see, So long lives this, and this gives life to thee.';
                 break;
         }
     },
