@@ -23,8 +23,11 @@ const Cards = {
         document.getElementById('addGroupBtn').addEventListener('click', () => this.addGroupFromModal());
 
         document.getElementById('multiSelectCancel').addEventListener('click', () => this.toggleMultiSelect(false));
+        document.getElementById('multiSelectMove').addEventListener('click', () => this.moveSelectedToGroup());
         document.getElementById('multiSelectDelete').addEventListener('click', () => this.deleteSelected());
         document.getElementById('multiSelectBlock').addEventListener('click', () => this.blockSelected());
+
+        document.getElementById('moveGroupCancel').addEventListener('click', () => this.hideMoveGroupModal());
 
         document.getElementById('cardFileInput').addEventListener('change', (e) => this.processFile(e));
 
@@ -61,14 +64,20 @@ const Cards = {
         bar.style.display = 'flex';
 
         const groups = Data.getGroups();
-        let html = `<div class="group-tag ${this.currentFilter === 'all' ? 'active' : ''}" data-group="all">\u5168\u90E8</div>`;
+        let html = `<div class="group-tag ${this.currentFilter === 'all' ? 'active' : ''}" data-group="all">全部</div>`;
         groups.forEach(g => {
             html += `<div class="group-tag ${this.currentFilter === g.id ? 'active' : ''}" data-group="${g.id}">
                 ${Utils.escapeHtml(g.name)}
                 <span class="tag-edit" data-edit-group="${g.id}">&#9998;</span>
             </div>`;
         });
-        html += `<div class="group-tag tag-manage" id="manageGroupsBtn">+ \u7BA1\u7406\u5206\u7EC4</div>`;
+        // Virtual "未分组" for cards without a valid group
+        const validIds = new Set(groups.map(g => g.id));
+        const hasUngrouped = Data.getCards().some(c => !c.group || !validIds.has(c.group));
+        if (hasUngrouped) {
+            html += `<div class="group-tag ${this.currentFilter === 'default' ? 'active' : ''}" data-group="default">未分组</div>`;
+        }
+        html += `<div class="group-tag tag-manage" id="manageGroupsBtn">+ 管理分组</div>`;
 
         bar.innerHTML = html;
 
@@ -470,6 +479,47 @@ const Cards = {
         Utils.toast('\u5DF2\u5C4F\u853D');
     },
 
+    moveSelectedToGroup() {
+        if (this.selectedCards.size === 0) { Utils.toast('\u8BF7\u5148\u9009\u62E9'); return; }
+        if (this.currentCardTab !== 'main') { Utils.toast('\u4EC5\u4E3B\u5B57\u5361\u652F\u6301\u5206\u7EC4'); return; }
+        this.showMoveGroupModal();
+    },
+
+    showMoveGroupModal() {
+        const modal = document.getElementById('moveGroupModal');
+        const list = document.getElementById('moveGroupList');
+        const groups = Data.getGroups();
+        let html = '';
+        groups.forEach(g => {
+            html += `<div class="group-picker-item" data-group-id="${g.id}">${Utils.escapeHtml(g.name)}</div>`;
+        });
+        // Also add "未分组" option
+        html += `<div class="group-picker-item" data-group-id="__ungrouped__">未分组（移除分组）</div>`;
+        list.innerHTML = html;
+        modal.style.display = 'flex';
+
+        list.querySelectorAll('.group-picker-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const groupId = item.dataset.groupId;
+                const ids = [...this.selectedCards];
+                const targetGroup = groupId === '__ungrouped__' ? null : groupId;
+                Data.moveCardsToGroup(ids, targetGroup);
+                this.selectedCards.clear();
+                this.toggleMultiSelect(false);
+                this.hideMoveGroupModal();
+                if (App.currentPage === 'cards') {
+                    this.renderGroupBar();
+                    this.renderCards();
+                }
+                Utils.toast(`\u5DF2\u79FB\u52A8 ${ids.length} \u5F20\u5B57\u5361`);
+            });
+        });
+    },
+
+    hideMoveGroupModal() {
+        document.getElementById('moveGroupModal').style.display = 'none';
+    },
+
     // ===== Import / Export =====
     handleExport() {
         const tab = this.currentCardTab;
@@ -574,18 +624,18 @@ const Cards = {
 
     renderGroupEditList() {
         const list = document.getElementById('groupListEdit');
-        const groups = Data.getGroups();
+        const groups = Data.getGroups().filter(g => g.id !== 'default');
 
         let html = '';
         groups.forEach(g => {
-            const canDelete = g.id !== 'default';
+            const canDelete = g.id !== 'preset';
             html += `
                 <div class="group-edit-row">
-                    <input type="text" value="${Utils.escapeHtml(g.name)}" data-group-id="${g.id}" ${g.id === 'default' ? 'readonly' : ''}>
-                    <button class="rename-group" data-rename-id="${g.id}" title="\u91CD\u547D\u540D">
+                    <input type="text" value="${Utils.escapeHtml(g.name)}" data-group-id="${g.id}" ${g.id === 'preset' ? 'readonly' : ''}>
+                    <button class="rename-group" data-rename-id="${g.id}" title="重命名">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                     </button>
-                    ${canDelete ? `<button class="delete-group" data-delete-group="${g.id}" title="\u5220\u9664">
+                    ${canDelete ? `<button class="delete-group" data-delete-group="${g.id}" title="删除">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>` : ''}
                 </div>
@@ -612,7 +662,7 @@ const Cards = {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.deleteGroup;
                 const group = Data.getGroups().find(g => g.id === id);
-                this.showConfirmDialog('\u5220\u9664\u5206\u7EC4', `\u786E\u5B9A\u5220\u9664\u5206\u7EC4"${group.name}"\u5417\uFF1F\u7EC4\u5185\u5B57\u5361\u5C06\u79FB\u81F3\u9ED8\u8BA4\u5206\u7EC4\u3002`, () => {
+                this.showConfirmDialog('删除分组', `确定删除分组"${group.name}"吗？组内字卡将移至未分组。`, () => {
                     Data.deleteGroup(id);
                     if (this.currentFilter === id) this.currentFilter = 'all';
                     this.renderGroupBar();
