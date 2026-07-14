@@ -272,19 +272,27 @@ html, body {
     color: var(--text-primary);
     user-select: none;
     -webkit-user-select: none;
+    margin: 0;
+    padding: 0;
+    /* 新增：防止 Safari 视口高度计算偏差 */
+    min-height: -webkit-fill-available;
 }
 
 #app {
     padding-top: 0;
     padding-bottom: 0;
     width: 100%;
-    height: 100%;
-    min-height: 100%;
     position: relative;
     max-width: 720px;
     margin: 0 auto;
     background: var(--bg-primary);
     overflow: hidden;
+
+    /* 使用动态视口高度，解决移动端浏览器工具栏导致的偏移 */
+    height: 100vh;          /* fallback */
+    height: 100dvh;         /* 现代浏览器动态视口 */
+    min-height: 100dvh;
+    max-height: 100dvh;
 }
 
 /* ===== Pages ===== */
@@ -327,13 +335,14 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 16px calc(var(--nav-height) + 20px);
+    padding: 20px 16px 20px;
     padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 20px);
     position: relative;
     z-index: 1;
     gap: 16px;
     overflow-y: auto;
-    min-height: 100%;
+    justify-content: center;
 }
 
 /* Top row: profile card + right column */
