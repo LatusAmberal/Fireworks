@@ -31,16 +31,7 @@ const Home = {
         document.getElementById('profileBio').textContent = profile.bio || '';
         document.getElementById('myStatusName').textContent = profile.nickname || 'sparkle';
 
-        const locEl = document.querySelector('#profileLocationWeather [data-field="location"]');
-        const weaEl = document.querySelector('#profileLocationWeather [data-field="weather"]');
-        if (locEl) locEl.textContent = profile.location || 'Shanghai';
-        if (weaEl) weaEl.textContent = profile.weather || 'Sunny 25\u00B0C';
-
         this.renderStatusSection();
-
-        if (profile.useRealWeather) {
-            this.fetchWeather();
-        }
     },
 
     // ===== Inline Editing =====
@@ -54,22 +45,6 @@ const Home = {
         document.getElementById('profileBio').addEventListener('dblclick', () => {
             this.showInlineEdit(document.getElementById('profileBio'), 'bio');
         });
-
-        const locPart = document.querySelector('#profileLocationWeather [data-field="location"]');
-        if (locPart) {
-            locPart.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                this.showInlineEdit(locPart, 'location');
-            });
-        }
-
-        const weaPart = document.querySelector('#profileLocationWeather [data-field="weather"]');
-        if (weaPart) {
-            weaPart.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                this.showInlineEdit(weaPart, 'weather');
-            });
-        }
 
         document.getElementById('myStatusText').addEventListener('dblclick', (e) => {
             e.stopPropagation();
@@ -140,14 +115,6 @@ const Home = {
                 break;
             case 'bio':
                 Data.updateProfile({ bio: value });
-                this.render();
-                break;
-            case 'location':
-                Data.updateProfile({ location: value });
-                this.render();
-                break;
-            case 'weather':
-                Data.updateProfile({ weather: value });
                 this.render();
                 break;
             case 'myStatus':
@@ -789,70 +756,5 @@ const Home = {
 
         Data.updateSettings({ musicPlayer: mp });
         this.renderMusicPlayer();
-    },
-
-    // ===== Weather =====
-    async fetchWeather() {
-        const profile = Data.getProfile();
-        try {
-            let lat = profile.lat;
-            let lon = profile.lon;
-
-            if (navigator.geolocation && !profile.lat) {
-                try {
-                    const pos = await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-                    });
-                    lat = pos.coords.latitude;
-                    lon = pos.coords.longitude;
-                    Data.updateProfile({ lat, lon });
-                } catch(e) {}
-            }
-
-            const res = await fetch(
-                `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`
-            );
-            const data = await res.json();
-            if (data && data.current) {
-                const temp = Math.round(data.current.temperature_2m);
-                const code = data.current.weather_code;
-                const desc = this.weatherCodeToText(code);
-                const weather = `${desc} ${temp}\u00B0C`;
-                Data.updateProfile({ weather, lat, lon });
-                this.render();
-                if (!profile.location || profile.useRealWeather) {
-                    this.reverseGeocode(lat, lon);
-                }
-            }
-        } catch(e) {}
-    },
-
-    async reverseGeocode(lat, lon) {
-        try {
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`
-            );
-            const data = await res.json();
-            if (data && data.address) {
-                const city = data.address.city || data.address.town || data.address.county || '';
-                if (city) {
-                    Data.updateProfile({ location: city });
-                    this.render();
-                }
-            }
-        } catch(e) {}
-    },
-
-    weatherCodeToText(code) {
-        const map = {
-            0: 'Sunny', 1: 'Mainly Sunny', 2: 'Partly Cloudy', 3: 'Cloudy',
-            45: 'Foggy', 48: 'Rime Fog',
-            51: 'Light Drizzle', 53: 'Drizzle', 55: 'Heavy Drizzle',
-            61: 'Light Rain', 63: 'Rain', 65: 'Heavy Rain',
-            71: 'Light Snow', 73: 'Snow', 75: 'Heavy Snow',
-            80: 'Light Showers', 81: 'Showers', 82: 'Heavy Showers',
-            95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Heavy Thunderstorm'
-        };
-        return map[code] || 'Unknown';
     }
 };
