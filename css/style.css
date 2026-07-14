@@ -2406,8 +2406,8 @@ html, body {
         max-width: 100%;
     }
     .home-bottom-row {
-        flex-direction: column;
         max-width: 100%;
+        gap: 8px;
     }
     .home-right-col {
         flex: 1;
@@ -2434,13 +2434,13 @@ html, body {
     .countdown-number {
         font-size: 22px;
     }
-    /* Music player - full width on mobile */
+    /* Music player - 30% width alongside photo wall */
     .music-player {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
+        flex: 3;
+        width: auto;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px;
     }
     .music-disc-wrap {
         width: 56px;
@@ -2462,7 +2462,10 @@ html, body {
     .polaroid {
         padding: 4px 4px 16px 4px;
     }
+    /* Photo wall - 70% width alongside music player */
     .photo-wall {
+        flex: 7;
+        max-width: none;
         padding: 4px;
     }
 
