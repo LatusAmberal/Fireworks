@@ -12,6 +12,7 @@ const defaultData = {
         location: 'Shanghai',
         weather: 'Sunny 25\u00B0C',
         useRealWeather: false,
+        myStatus: '\u5728\u7EBF',
         lat: 31.23,
         lon: 121.47,
         anniversaryDate: null,
@@ -39,26 +40,25 @@ const defaultData = {
         wifiLevel: 65
     },
     groups: [
-        { id: 'default', name: '\u9ED8\u8BA4\u5206\u7EC4' },
-        { id: 'greetings', name: '\u65E5\u5E38\u95EE\u5019' },
-        { id: 'funny', name: '\u8DA3\u5473' }
+        { id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' },
+        { id: 'default', name: '\u9ED8\u8BA4\u5206\u7EC4' }
     ],
     cards: [
-        { id: 'c1', content: '\u4F60\u597D\u5440\uFF01', translation: 'Hello there!', group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c2', content: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', translation: 'How was your day?', group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c3', content: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', translation: 'Good night, sweet dreams', group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c4', content: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48\uFF1F', translation: 'What did you have for lunch?', group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c5', content: '\u597D\u4E45\u4E0D\u89C1\uFF01', translation: 'Long time no see!', group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c6', content: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', translation: 'Hahaha that is so funny', group: 'funny', blocked: false, usageCount: 0 },
-        { id: 'c7', content: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', translation: 'I think so too', group: 'funny', blocked: false, usageCount: 0 },
-        { id: 'c8', content: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', translation: 'This is absolutely ridiculous', group: 'funny', blocked: false, usageCount: 0 },
-        { id: 'c9', content: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', translation: 'You make a good point', group: 'default', blocked: false, usageCount: 0 },
-        { id: 'c10', content: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', translation: "I'm listening, go on", group: 'default', blocked: false, usageCount: 0 },
-        { id: 'c11', content: '\u539F\u6765\u5982\u6B64', translation: 'I see', group: 'default', blocked: false, usageCount: 0 },
-        { id: 'c12', content: '\u55EF\u55EF\uFF0C\u7136\u540E\u5462\uFF1F', translation: 'Yeah, and then?', group: 'default', blocked: false, usageCount: 0 },
-        { id: 'c13', content: '\u54C7\uFF0C\u597D\u5389\u5BB3\uFF01', translation: 'Wow, amazing!', group: 'funny', blocked: false, usageCount: 0 },
-        { id: 'c14', content: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', translation: "Let's do our best together", group: 'greetings', blocked: false, usageCount: 0 },
-        { id: 'c15', content: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', translation: "Don't forget to rest", group: 'greetings', blocked: false, usageCount: 0 }
+        { id: 'c1', content: '\u4F60\u597D\u5440\uFF01', translation: 'Hello there!', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c2', content: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', translation: 'How was your day?', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c3', content: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', translation: 'Good night, sweet dreams', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c4', content: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48\uFF1F', translation: 'What did you have for lunch?', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c5', content: '\u597D\u4E45\u4E0D\u89C1\uFF01', translation: 'Long time no see!', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c6', content: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', translation: 'Hahaha that is so funny', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c7', content: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', translation: 'I think so too', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c8', content: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', translation: 'This is absolutely ridiculous', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c9', content: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', translation: 'You make a good point', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c10', content: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', translation: "I'm listening, go on", group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c11', content: '\u539F\u6765\u5982\u6B64', translation: 'I see', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c12', content: '\u55EF\u55EF\uFF0C\u7136\u540E\u5462\uFF1F', translation: 'Yeah, and then?', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c13', content: '\u54C7\uFF0C\u597D\u5389\u5BB3\uFF01', translation: 'Wow, amazing!', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c14', content: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', translation: "Let's do our best together", group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c15', content: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', translation: "Don't forget to rest", group: 'preset', blocked: false, usageCount: 0 }
     ],
     messages: [],
     firstChatDate: null,
@@ -171,6 +171,28 @@ const Data = {
                 if (!this.data.cards) this.data.cards = defaultData.cards;
                 if (!this.data.emojiCards) this.data.emojiCards = defaultData.emojiCards;
                 if (!this.data.giftCards) this.data.giftCards = defaultData.giftCards;
+                // Migration: merge old groups into 'preset'
+                if (!this.data._migratedPreset) {
+                    if (!this.data.groups.find(g => g.id === 'preset')) {
+                        this.data.groups.unshift({ id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' });
+                    }
+                    // Move cards from old preset groups to 'preset'
+                    const oldGroupIds = ['greetings', 'funny'];
+                    this.data.cards.forEach(c => {
+                        if (oldGroupIds.includes(c.group)) {
+                            c.group = 'preset';
+                        }
+                    });
+                    // Remove empty old groups
+                    this.data.groups = this.data.groups.filter(g => {
+                        if (oldGroupIds.includes(g.id)) {
+                            return this.data.cards.some(c => c.group === g.id);
+                        }
+                        return true;
+                    });
+                    this.data._migratedPreset = true;
+                    this.save();
+                }
             } catch (e) {
                 this.data = JSON.parse(JSON.stringify(defaultData));
             }
@@ -181,7 +203,12 @@ const Data = {
     },
 
     save() {
-        localStorage.setItem(DB_KEY, JSON.stringify(this.data));
+        try {
+            localStorage.setItem(DB_KEY, JSON.stringify(this.data));
+        } catch (e) {
+            console.error('Failed to save data:', e);
+            Utils.toast('\u6570\u636E\u4FDD\u5B58\u5931\u8D25\uFF0C\u53EF\u80FD\u662F\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3');
+        }
     },
 
     // Profile
