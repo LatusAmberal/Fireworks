@@ -41,24 +41,24 @@ const defaultData = {
     },
     groups: [
         { id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' },
-        { id: 'default', name: '\u9ED8\u8BA4\u5206\u7EC4' }
+        { id: 'default', name: '\u672A\u5206\u7EC4' }
     ],
     cards: [
-        { id: 'c1', content: '\u4F60\u597D\u5440\uFF01', translation: 'Hello there!', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c2', content: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', translation: 'How was your day?', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c3', content: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', translation: 'Good night, sweet dreams', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c4', content: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48\uFF1F', translation: 'What did you have for lunch?', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c5', content: '\u597D\u4E45\u4E0D\u89C1\uFF01', translation: 'Long time no see!', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c6', content: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', translation: 'Hahaha that is so funny', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c7', content: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', translation: 'I think so too', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c8', content: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', translation: 'This is absolutely ridiculous', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c9', content: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', translation: 'You make a good point', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c10', content: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', translation: "I'm listening, go on", group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c11', content: '\u539F\u6765\u5982\u6B64', translation: 'I see', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c12', content: '\u55EF\u55EF\uFF0C\u7136\u540E\u5462\uFF1F', translation: 'Yeah, and then?', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c13', content: '\u54C7\uFF0C\u597D\u5389\u5BB3\uFF01', translation: 'Wow, amazing!', group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c14', content: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', translation: "Let's do our best together", group: 'preset', blocked: false, usageCount: 0 },
-        { id: 'c15', content: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', translation: "Don't forget to rest", group: 'preset', blocked: false, usageCount: 0 }
+        { id: 'c1', content: '\u4F60\u597D\u5440\uFF01', translation: '\u4F60\u597D\u5440\uFF01', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c2', content: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', translation: '\u4ECA\u5929\u8FC7\u5F97\u600E\u4E48\u6837\uFF1F', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c3', content: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', translation: '\u665A\u5B89\uFF0C\u505A\u4E2A\u597D\u68A6', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c4', content: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48\uFF1F', translation: '\u4E2D\u5348\u5403\u4E86\u4EC0\u4E48', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c5', content: '\u597D\u4E45\u4E0D\u89C1\uFF01', translation: '\u597D\u4E45\u4E0D\u89C1\uFF01', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c6', content: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', translation: '\u54C8\u54C8\u54C8\u592A\u641E\u7B11\u4E86', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c7', content: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', translation: '\u6211\u4E5F\u662F\u8FD9\u4E48\u60F3\u7684', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c8', content: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', translation: '\u8FD9\u4E5F\u592A\u79BB\u8C31\u4E86\u5427', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c9', content: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', translation: '\u4F60\u8BF4\u7684\u6709\u9053\u7406', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c10', content: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', translation: '\u6211\u5728\u542C\uFF0C\u7EE7\u7EED\u8BF4', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c11', content: '\u539F\u6765\u5982\u6B64', translation: '\u539F\u6765\u5982\u6B64', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c12', content: '\u55EF\u55EF\uFF0C\u7136\u540E\u5462\uFF1F', translation: '\u55EF\u55EF\u7136\u540E\u5462', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c13', content: '\u54C7\uFF0C\u597D\u5389\u5BB3\uFF01', translation: '\u54C7\u597D\u5389\u5BB3', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c14', content: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', translation: '\u6211\u4EEC\u4E00\u8D77\u52A0\u6CB9\u5427', group: 'preset', blocked: false, usageCount: 0 },
+        { id: 'c15', content: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', translation: '\u522B\u5FD8\u4E86\u4F11\u606F\u54E6', group: 'preset', blocked: false, usageCount: 0 }
     ],
     messages: [],
     firstChatDate: null,
@@ -134,7 +134,8 @@ const defaultData = {
         patSettings: {
             enabled: true,
             patText: '\u62CD\u4E86\u62CD',
-            userPatCustomText: '\u5934',
+            userPatPrefix: '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A',
+            peerPatPrefix: '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A',
             patTriggerProbability: 0.05
         },
         drawerSettings: {
@@ -155,60 +156,153 @@ const defaultData = {
     selectedCards: []
 };
 
+// ===== IndexedDB Backup Store =====
+const IDBStore = {
+    _db: null,
+    _dbReady: null,
+
+    _open() {
+        if (this._dbReady) return this._dbReady;
+        this._dbReady = new Promise((resolve, reject) => {
+            if (!window.indexedDB) {
+                reject(new Error('IndexedDB not available'));
+                return;
+            }
+            const request = window.indexedDB.open('FireworksDB', 1);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                this._db = request.result;
+                resolve(this._db);
+            };
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('data')) {
+                    db.createObjectStore('data', { keyPath: 'key' });
+                }
+            };
+        });
+        return this._dbReady;
+    },
+
+    get(key) {
+        return this._open().then(db => {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('data', 'readonly');
+                const store = tx.objectStore('data');
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                req.onerror = () => reject(req.error);
+            });
+        });
+    },
+
+    set(key, value) {
+        return this._open().then(db => {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('data', 'readwrite');
+                const store = tx.objectStore('data');
+                const req = store.put({ key, value });
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        });
+    }
+};
+
 const Data = {
     data: null,
 
     init() {
-        const saved = localStorage.getItem(DB_KEY);
-        if (saved) {
-            try {
+        let loaded = false;
+
+        // 1. Try localStorage (synchronous, always available)
+        try {
+            const saved = localStorage.getItem(DB_KEY);
+            if (saved) {
                 this.data = JSON.parse(saved);
-                this.data = { ...defaultData, ...this.data };
-                this.data.profile = { ...defaultData.profile, ...this.data.profile };
-                this.data.peer = { ...defaultData.peer, ...this.data.peer };
-                this.data.settings = { ...defaultData.settings, ...this.data.settings };
-                if (!this.data.groups) this.data.groups = defaultData.groups;
-                if (!this.data.cards) this.data.cards = defaultData.cards;
-                if (!this.data.emojiCards) this.data.emojiCards = defaultData.emojiCards;
-                if (!this.data.giftCards) this.data.giftCards = defaultData.giftCards;
-                // Migration: merge old groups into 'preset'
-                if (!this.data._migratedPreset) {
-                    if (!this.data.groups.find(g => g.id === 'preset')) {
-                        this.data.groups.unshift({ id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' });
-                    }
-                    // Move cards from old preset groups to 'preset'
-                    const oldGroupIds = ['greetings', 'funny'];
-                    this.data.cards.forEach(c => {
-                        if (oldGroupIds.includes(c.group)) {
-                            c.group = 'preset';
-                        }
-                    });
-                    // Remove empty old groups
-                    this.data.groups = this.data.groups.filter(g => {
-                        if (oldGroupIds.includes(g.id)) {
-                            return this.data.cards.some(c => c.group === g.id);
-                        }
-                        return true;
-                    });
-                    this.data._migratedPreset = true;
-                    this.save();
-                }
-            } catch (e) {
-                this.data = JSON.parse(JSON.stringify(defaultData));
+                loaded = true;
             }
-        } else {
+        } catch (e) {
+            // localStorage read failed or corrupted
+        }
+
+        // 2. If localStorage empty, try IndexedDB as async fallback
+        if (!loaded) {
+            // Set a temporary default - will be replaced when IDB loads
             this.data = JSON.parse(JSON.stringify(defaultData));
+
+            IDBStore.get(DB_KEY).then(idbData => {
+                if (idbData) {
+                    this.data = idbData;
+                }
+                this._mergeDefaults();
+                this._runMigrations();
+                // Sync back to localStorage
+                try { localStorage.setItem(DB_KEY, JSON.stringify(this.data)); } catch (e) {}
+            }).catch(() => {
+                this._mergeDefaults();
+                this.save();
+            });
+        } else {
+            this._mergeDefaults();
+            this._runMigrations();
+            // Background: also try to load newer data from IDB
+            IDBStore.get(DB_KEY).then(idbData => {
+                if (idbData && idbData.messages && idbData.messages.length > (this.data.messages || []).length) {
+                    this.data = idbData;
+                    this._mergeDefaults();
+                    this._runMigrations();
+                    try { localStorage.setItem(DB_KEY, JSON.stringify(this.data)); } catch (e) {}
+                }
+            }).catch(() => {});
+        }
+    },
+
+    _mergeDefaults() {
+        const raw = this.data;
+        this.data = { ...defaultData, ...raw };
+        this.data.profile = { ...defaultData.profile, ...(raw.profile || {}) };
+        this.data.peer = { ...defaultData.peer, ...(raw.peer || {}) };
+        this.data.settings = { ...defaultData.settings, ...(raw.settings || {}) };
+        if (!this.data.groups) this.data.groups = defaultData.groups;
+        if (!this.data.cards) this.data.cards = defaultData.cards;
+        if (!this.data.emojiCards) this.data.emojiCards = defaultData.emojiCards;
+        if (!this.data.giftCards) this.data.giftCards = defaultData.giftCards;
+    },
+
+    _runMigrations() {
+        if (!this.data._migratedPreset) {
+            if (!this.data.groups.find(g => g.id === 'preset')) {
+                this.data.groups.unshift({ id: 'preset', name: '\u9884\u8BBE\u5206\u7EC4' });
+            }
+            const oldGroupIds = ['greetings', 'funny'];
+            this.data.cards.forEach(c => {
+                if (oldGroupIds.includes(c.group)) {
+                    c.group = 'preset';
+                }
+            });
+            this.data.groups = this.data.groups.filter(g => {
+                if (oldGroupIds.includes(g.id)) {
+                    return this.data.cards.some(c => c.group === g.id);
+                }
+                return true;
+            });
+            this.data._migratedPreset = true;
             this.save();
         }
     },
 
     save() {
+        // Primary: localStorage (sync)
         try {
             localStorage.setItem(DB_KEY, JSON.stringify(this.data));
         } catch (e) {
-            console.error('Failed to save data:', e);
-            Utils.toast('\u6570\u636E\u4FDD\u5B58\u5931\u8D25\uFF0C\u53EF\u80FD\u662F\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3');
+            // localStorage full, notify and try IDB
+            console.error('localStorage save failed, using IDB backup:', e);
+            Utils.toast('\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u6B63\u5728\u4F7F\u7528\u5907\u7528\u5B58\u50A8');
         }
+        // Always save to IndexedDB as backup (async, non-blocking)
+        IDBStore.set(DB_KEY, this.data).catch(() => {});
     },
 
     // Profile
