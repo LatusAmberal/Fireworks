@@ -133,6 +133,7 @@ const defaultData = {
         },
         splashTitle: 'Sonnet',
         splashSubtitle: 'Shall I compare thee to a summer\'s day?\nThou art more lovely and more temperate.',
+        homeQuote: 'I have crossed oceans of time to find you.',
         patSettings: {
             enabled: true,
             patText: '\u62CD\u4E86\u62CD',
