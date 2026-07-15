@@ -790,48 +790,98 @@ const Data = {
     },
     exportCardsTxt() {
         let txt = '# Fireworks \u5B57\u5361\u5E93\u5BFC\u51FA\n';
-        txt += '# \u683C\u5F0F\u8BF4\u660E\uFF1A\u6BCF\u884C\u4E00\u6761\u5B57\u5361\uFF0C{{}}\u5185\u4E3A\u7FFB\u8BD1\n\n';
+        txt += '# \u683C\u5F0F\u8BF4\u660E\uFF1A\u3010\u3011\u5185\u4E3A\u5206\u7EC4\uFF0C{}\u5185\u4E3A\u7FFB\u8BD1\n\n';
+
+        // Group cards by group name
+        const grouped = {};
         this.data.cards.forEach(c => {
-            const groupName = (this.data.groups.find(g => g.id === c.group) || {}).name || '未分组';
-            txt += `[${groupName}] ${c.content}`;
-            if (c.translation) txt += ` {{${c.translation}}}`;
-            txt += '\n';
+            const groupName = (this.data.groups.find(g => g.id === c.group) || {}).name || '\u672A\u5206\u7EC4';
+            if (!grouped[groupName]) grouped[groupName] = [];
+            grouped[groupName].push(c);
         });
+
+        for (const [groupName, cards] of Object.entries(grouped)) {
+            txt += `\u3010${groupName}\u3011\n`;
+            cards.forEach(c => {
+                txt += c.content;
+                if (c.translation) txt += ` {${c.translation}}`;
+                txt += '\n';
+            });
+            txt += '\n';
+        }
         return txt;
     },
-    importCardsTxt(txt) {
+    importCardsTxt(txt, mode = 'append') {
+        // Overwrite mode: clear all existing main cards first
+        if (mode === 'overwrite') {
+            this.data.cards = [];
+        }
+
         const lines = txt.split('\n');
         let added = 0;
+        let currentGroup = null;
+
+        // Build set of existing card contents for dedup (append mode only)
+        const existingContents = mode === 'append' ? new Set(this.data.cards.map(c => c.content)) : null;
+
         lines.forEach(line => {
             let trimmed = line.trim();
             if (!trimmed || trimmed.startsWith('#')) return;
 
-            let cardGroup = null;
-            const groupMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)/);
-            if (groupMatch) {
-                const groupName = groupMatch[1].trim();
-                trimmed = groupMatch[2];
+            // New format group header: \u3010xxx\u3011
+            const newGroupMatch = trimmed.match(/^\u3010(.+?)\u3011$/);
+            if (newGroupMatch) {
+                const groupName = newGroupMatch[1].trim();
                 const existingGroup = this.data.groups.find(g => g.name === groupName);
                 if (existingGroup) {
-                    cardGroup = existingGroup.id;
+                    currentGroup = existingGroup.id;
                 } else {
-                    cardGroup = this.addGroup(groupName);
+                    currentGroup = this.addGroup(groupName);
+                }
+                return;
+            }
+
+            // Old format: [Group] content (backward compatible)
+            const oldGroupMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)/);
+            if (oldGroupMatch) {
+                const groupName = oldGroupMatch[1].trim();
+                trimmed = oldGroupMatch[2];
+                const existingGroup = this.data.groups.find(g => g.name === groupName);
+                if (existingGroup) {
+                    currentGroup = existingGroup.id;
+                } else {
+                    currentGroup = this.addGroup(groupName);
                 }
             }
 
             let content = trimmed;
             let translation = '';
-            const transMatch = content.match(/\{\{(.+?)\}\}/);
-            if (transMatch) {
-                translation = transMatch[1].trim();
-                content = content.replace(/\{\{.+?\}\}/, '').trim();
+
+            // New format: {translation} at end of line
+            const newTransMatch = content.match(/\s*\{(.+?)\}\s*$/);
+            if (newTransMatch) {
+                translation = newTransMatch[1].trim();
+                content = content.replace(/\s*\{.+?\}\s*$/, '').trim();
             }
+            // Old format: {{translation}} (backward compatible)
+            if (!translation) {
+                const oldTransMatch = content.match(/\{\{(.+?)\}\}/);
+                if (oldTransMatch) {
+                    translation = oldTransMatch[1].trim();
+                    content = content.replace(/\{\{.+?\}\}/, '').trim();
+                }
+            }
+
             if (content) {
+                // Dedup in append mode
+                if (existingContents && existingContents.has(content)) return;
+                if (existingContents) existingContents.add(content);
+
                 this.data.cards.push({
                     id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '_' + added,
                     content,
                     translation,
-                    group: cardGroup,
+                    group: currentGroup,
                     blocked: false,
                     usageCount: 0
                 });
@@ -840,6 +890,76 @@ const Data = {
         });
         this.save();
         return added;
+    },
+    // Dedup functions
+    dedupCards() {
+        const seen = new Set();
+        const unique = [];
+        let removed = 0;
+        for (let i = this.data.cards.length - 1; i >= 0; i--) {
+            const c = this.data.cards[i];
+            if (!seen.has(c.content)) {
+                seen.add(c.content);
+                unique.unshift(this.data.cards[i]);
+            } else {
+                removed++;
+            }
+        }
+        this.data.cards = unique;
+        this.save();
+        return removed;
+    },
+    dedupStatusCards() {
+        const seen = new Set();
+        const unique = [];
+        let removed = 0;
+        for (let i = this.data.statusCards.length - 1; i >= 0; i--) {
+            const c = this.data.statusCards[i];
+            if (!seen.has(c.content)) {
+                seen.add(c.content);
+                unique.unshift(this.data.statusCards[i]);
+            } else {
+                removed++;
+            }
+        }
+        this.data.statusCards = unique;
+        this.save();
+        return removed;
+    },
+    dedupEmojiCards() {
+        const seen = new Set();
+        const unique = [];
+        let removed = 0;
+        for (let i = this.data.emojiCards.length - 1; i >= 0; i--) {
+            const c = this.data.emojiCards[i];
+            if (!seen.has(c.content)) {
+                seen.add(c.content);
+                unique.unshift(this.data.emojiCards[i]);
+            } else {
+                removed++;
+            }
+        }
+        this.data.emojiCards = unique;
+        this.save();
+        return removed;
+    },
+    dedupGiftCards() {
+        const seen = new Set();
+        const unique = [];
+        let removed = 0;
+        for (let i = this.data.giftCards.length - 1; i >= 0; i--) {
+            const c = this.data.giftCards[i];
+            const key = `${c.emoji}|${c.name}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                unique.unshift(this.data.giftCards[i]);
+            } else {
+                removed++;
+            }
+        }
+        this.data.giftCards = unique;
+        this.save();
+        return removed;
     },
     clearAll() {
         this.data = JSON.parse(JSON.stringify(defaultData));
