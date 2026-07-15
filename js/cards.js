@@ -19,6 +19,11 @@ const Cards = {
 
         document.getElementById('addCardCancel').addEventListener('click', () => this.hideAddModal());
         document.getElementById('addCardConfirm').addEventListener('click', () => this.confirmAdd());
+        // Enter key to confirm in single-line add inputs
+        ['addCardGiftName', 'addCardGiftEmoji', 'addCardGiftDesc', 'addCardStatusInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.confirmAdd(); });
+        });
         document.getElementById('editCardCancel').addEventListener('click', () => this.hideEditModal());
         document.getElementById('editCardConfirm').addEventListener('click', () => this.confirmEdit());
         document.getElementById('groupModalClose').addEventListener('click', () => this.hideGroupModal());
@@ -241,6 +246,17 @@ const Cards = {
         const groupRow = document.getElementById('addCardGroupRow');
         const select = document.getElementById('addCardGroupSelect');
         const textarea = document.getElementById('addCardTextarea');
+        const giftName = document.getElementById('addCardGiftName');
+        const giftEmoji = document.getElementById('addCardGiftEmoji');
+        const giftDesc = document.getElementById('addCardGiftDesc');
+        const statusInput = document.getElementById('addCardStatusInput');
+
+        // Reset all inputs to hidden by default
+        textarea.style.display = 'block';
+        if (giftName) { giftName.style.display = 'none'; giftName.value = ''; }
+        if (giftEmoji) { giftEmoji.style.display = 'none'; giftEmoji.value = ''; }
+        if (giftDesc) { giftDesc.style.display = 'none'; giftDesc.value = ''; }
+        if (statusInput) { statusInput.style.display = 'none'; statusInput.value = ''; }
 
         if (tab !== 'main') {
             groupRow.style.display = 'none';
@@ -252,15 +268,27 @@ const Cards = {
 
         textarea.value = '';
         if (tab === 'gift') {
-            textarea.placeholder = '\u6BCF\u884C\u4E00\u4E2A\u793C\u7269\uFF0C\u7528 | \u5206\u9694\u5B57\u6BB5\nEmoji | \u540D\u79F0 | \u63CF\u8FF0\n\u4F8B\u5982\uFF1A\uD83C\uDF39 | \u73ab\u7470 | \u4E00\u6735\u4EE3\u8868\u5FC3\u610F\u7684\u73ab\u7470';
+            textarea.style.display = 'none';
+            if (giftName) giftName.style.display = 'block';
+            if (giftEmoji) giftEmoji.style.display = 'block';
+            if (giftDesc) giftDesc.style.display = 'block';
+            modal.querySelector('.modal-header').textContent = '添加礼物';
+            setTimeout(() => { if (giftName) giftName.focus(); }, 100);
+        } else if (tab === 'status') {
+            textarea.style.display = 'none';
+            if (statusInput) statusInput.style.display = 'block';
+            modal.querySelector('.modal-header').textContent = '添加对方状态';
+            setTimeout(() => { if (statusInput) statusInput.focus(); }, 100);
         } else if (tab === 'emoji') {
-            textarea.placeholder = '\u6BCF\u884C\u4E00\u4E2A Emoji\uFF0C\u53EF\u4EE5\u662F\u5355\u4E2A\u4E5F\u53EF\u4EE5\u662F\u591A\u4E2A\uFF1A\uD83D\uDE02 \uD83D\uDC4D';
+            textarea.placeholder = '每行一个 Emoji，可以是单个也可以是多个：😂 👍';
+            modal.querySelector('.modal-header').textContent = '添加 Emoji';
+            setTimeout(() => textarea.focus(), 100);
         } else {
-            textarea.placeholder = '\u6BCF\u884C\u4E00\u6761\u5B57\u5361\u000A\u7528 {{\u7FFB\u8BD1\u5185\u5BB9}} \u6DFB\u52A0\u7FFB\u8BD1\u000A\u4F8B\u5982\uFF1A\u4F60\u597D {{Hello}}';
+            textarea.placeholder = '每行一条字卡\n用 {翻译内容} 添加翻译\n例如：你好 {Hello}';
+            modal.querySelector('.modal-header').textContent = '添加字卡';
+            setTimeout(() => textarea.focus(), 100);
         }
-        modal.querySelector('.modal-header').textContent = tab === 'emoji' ? '\u6DFB\u52A0 Emoji' : (tab === 'gift' ? '\u6DFB\u52A0\u793C\u7269' : '\u6DFB\u52A0\u5B57\u5361');
         modal.style.display = 'flex';
-        setTimeout(() => textarea.focus(), 100);
     },
 
     hideAddModal() {
@@ -269,28 +297,33 @@ const Cards = {
 
     confirmAdd() {
         const tab = this.currentCardTab;
-        const text = document.getElementById('addCardTextarea').value;
-
-        if (!text.trim()) {
-            Utils.toast('\u8BF7\u8F93\u5165\u5185\u5BB9');
-            return;
-        }
-
-        const lines = text.split('\n');
         let added = 0;
 
         if (tab === 'gift') {
-            lines.forEach(line => {
-                const parts = line.split('|').map(s => s.trim());
-                if (parts.length >= 2) {
-                    Data.addGiftCard(parts[0] || '\uD83C\uDF81', parts[1], parts[2] || '');
-                    added++;
-                } else if (parts.length === 1 && parts[0]) {
-                    Data.addGiftCard('\uD83C\uDF81', parts[0], '');
-                    added++;
-                }
-            });
+            const name = document.getElementById('addCardGiftName').value.trim();
+            const emoji = document.getElementById('addCardGiftEmoji').value.trim();
+            const desc = document.getElementById('addCardGiftDesc').value.trim();
+            if (!name && !emoji) {
+                Utils.toast('请至少输入礼物名称或 Emoji');
+                return;
+            }
+            Data.addGiftCard(emoji || '🎁', name || '礼物', desc);
+            added = 1;
+        } else if (tab === 'status') {
+            const content = document.getElementById('addCardStatusInput').value.trim();
+            if (!content) {
+                Utils.toast('请输入状态内容');
+                return;
+            }
+            Data.addStatusCard(content);
+            added = 1;
         } else if (tab === 'emoji') {
+            const text = document.getElementById('addCardTextarea').value;
+            if (!text.trim()) {
+                Utils.toast('请输入内容');
+                return;
+            }
+            const lines = text.split('\n');
             lines.forEach(line => {
                 const content = line.trim();
                 if (content) {
@@ -298,15 +331,13 @@ const Cards = {
                     added++;
                 }
             });
-        } else if (tab === 'status') {
-            lines.forEach(line => {
-                const content = line.trim();
-                if (content) {
-                    Data.addStatusCard(content);
-                    added++;
-                }
-            });
         } else {
+            const text = document.getElementById('addCardTextarea').value;
+            if (!text.trim()) {
+                Utils.toast('请输入内容');
+                return;
+            }
+            const lines = text.split('\n');
             const group = document.getElementById('addCardGroupSelect').value;
             Data.addCards(lines, group);
             added = lines.filter(l => l.trim()).length;
@@ -314,7 +345,7 @@ const Cards = {
         }
         this.hideAddModal();
         this.renderCards();
-        Utils.toast(`\u5DF2\u6DFB\u52A0 ${added} \u6761`);
+        Utils.toast(`已添加 ${added} 条`);
     },
 
     // ===== Edit Modal =====
