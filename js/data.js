@@ -136,9 +136,8 @@ const defaultData = {
         homeQuote: 'I have crossed oceans of time to find you.',
         patSettings: {
             enabled: true,
-            patText: '\u62CD\u4E86\u62CD',
-            userPatPrefix: '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A',
-            peerPatPrefix: '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A',
+            patUserSuffix: '',
+            patPeerSuffix: '',
             patTriggerProbability: 0.05
         },
         drawerSettings: {
@@ -467,10 +466,10 @@ const Data = {
             let content = line.trim();
             if (!content) return;
             let translation = '';
-            const match = content.match(/\{\{(.+?)\}\}/);
+            const match = content.match(/\{(.+?)\}/);
             if (match) {
                 translation = match[1].trim();
-                content = content.replace(/\{\{.+?\}\}/, '').trim();
+                content = content.replace(/\{.+?\}/, '').trim();
             }
             if (content) {
                 this.data.cards.push({
