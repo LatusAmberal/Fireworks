@@ -215,10 +215,12 @@ const IDBStore = {
 const Data = {
     data: null,
 
+    _mediaLoaded: false,
+
     init() {
         let loaded = false;
 
-        // 1. Try localStorage (synchronous, always available)
+        // 1. Try localStorage (synchronous, fast initial render - text only, no media)
         try {
             const saved = localStorage.getItem(DB_KEY);
             if (saved) {
@@ -229,35 +231,49 @@ const Data = {
             // localStorage read failed or corrupted
         }
 
-        // 2. If localStorage empty, try IndexedDB as async fallback
-        if (!loaded) {
-            // Set a temporary default - will be replaced when IDB loads
-            this.data = JSON.parse(JSON.stringify(defaultData));
-
-            IDBStore.get(DB_KEY).then(idbData => {
-                if (idbData) {
-                    this.data = idbData;
-                }
-                this._mergeDefaults();
-                this._runMigrations();
-                // Sync back to localStorage
-                try { localStorage.setItem(DB_KEY, JSON.stringify(this.data)); } catch (e) {}
-            }).catch(() => {
-                this._mergeDefaults();
-                this.save();
-            });
-        } else {
+        if (loaded) {
             this._mergeDefaults();
             this._runMigrations();
-            // Background: also try to load newer data from IDB
-            IDBStore.get(DB_KEY).then(idbData => {
-                if (idbData && idbData.messages && idbData.messages.length > (this.data.messages || []).length) {
-                    this.data = idbData;
-                    this._mergeDefaults();
-                    this._runMigrations();
-                    try { localStorage.setItem(DB_KEY, JSON.stringify(this.data)); } catch (e) {}
-                }
-            }).catch(() => {});
+        } else {
+            // Set defaults - will be replaced when IDB loads
+            this.data = JSON.parse(JSON.stringify(defaultData));
+            this._mergeDefaults();
+        }
+
+        // 2. Always load full data from IndexedDB (has media that localStorage doesn't)
+        IDBStore.get(DB_KEY).then(idbData => {
+            if (idbData) {
+                // IndexedDB has full data with media - use it
+                this.data = idbData;
+                this._mergeDefaults();
+                this._runMigrations();
+            } else if (!loaded) {
+                // No data anywhere - save defaults
+                this.save();
+            }
+            // Re-apply visual settings that depend on media
+            this._onMediaLoaded();
+        }).catch(() => {
+            this._onMediaLoaded();
+        });
+
+        // Request persistent storage to prevent browser from evicting data
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(() => {}).catch(() => {});
+        }
+    },
+
+    _onMediaLoaded() {
+        if (this._mediaLoaded) return;
+        this._mediaLoaded = true;
+        // Re-apply visual settings that depend on base64 media (loaded from IndexedDB)
+        if (typeof App !== 'undefined') {
+            if (App.applyAvatarSettings) App.applyAvatarSettings();
+            if (App.applyChatBackground) App.applyChatBackground();
+        }
+        if (typeof Home !== 'undefined') {
+            if (Home.renderPhotoWall) Home.renderPhotoWall();
+            if (Home.renderMusicPlayer) Home.renderMusicPlayer();
         }
     },
 
@@ -337,16 +353,42 @@ const Data = {
     },
 
     save() {
-        // Primary: localStorage (sync)
+        const fullData = this.data;
+
+        // Always save full data to IndexedDB (primary - handles large media)
+        IDBStore.set(DB_KEY, fullData).catch(() => {});
+
+        // Try to save to localStorage (for fast sync load on next visit)
         try {
-            localStorage.setItem(DB_KEY, JSON.stringify(this.data));
+            localStorage.setItem(DB_KEY, JSON.stringify(fullData));
         } catch (e) {
-            // localStorage full, notify and try IDB
-            console.error('localStorage save failed, using IDB backup:', e);
-            Utils.toast('\u5B58\u50A8\u7A7A\u95F4\u4E0D\u8DB3\uFF0C\u6B63\u5728\u4F7F\u7528\u5907\u7528\u5B58\u50A8');
+            // localStorage full - save stripped version (media stored in IndexedDB only)
+            try {
+                const stripped = this._stripMedia(fullData);
+                localStorage.setItem(DB_KEY, JSON.stringify(stripped));
+            } catch (e2) {
+                // Even stripped version too large - skip localStorage, rely on IndexedDB
+                console.warn('localStorage save skipped, using IndexedDB only');
+            }
         }
-        // Always save to IndexedDB as backup (async, non-blocking)
-        IDBStore.set(DB_KEY, this.data).catch(() => {});
+    },
+
+    _stripMedia(data) {
+        const clone = JSON.parse(JSON.stringify(data));
+        const s = clone.settings;
+        if (!s) return clone;
+        // Strip large base64 media fields (they'll be loaded from IndexedDB)
+        if (s.myAvatar) s.myAvatar = '';
+        if (s.otherAvatar) s.otherAvatar = '';
+        if (s.homeBackground) s.homeBackground = '';
+        if (s.cardBackground) s.cardBackground = '';
+        if (s.profileCardBg) s.profileCardBg = '';
+        if (s.peerAvatar) s.peerAvatar = '';
+        if (s.chatBackground) s.chatBackground = '';
+        if (s.musicPlayer && s.musicPlayer.discImage) s.musicPlayer.discImage = '';
+        if (s.photoWall) s.photoWall.forEach(p => { if (p.dataUrl) p.dataUrl = ''; });
+        if (s.customSounds) s.customSounds.forEach(cs => { if (cs.dataUrl) cs.dataUrl = ''; });
+        return clone;
     },
 
     // Profile
@@ -956,6 +998,42 @@ const Utils = {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    },
+
+    // Compress image using canvas - reduces file size dramatically
+    compressImage(file, maxWidth = 1920, quality = 0.75) {
+        return new Promise((resolve, reject) => {
+            if (!file.type.startsWith('image/')) {
+                reject(new Error('Not an image'));
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.naturalWidth;
+                    let h = img.naturalHeight;
+                    if (w > maxWidth) {
+                        h = Math.round(h * maxWidth / w);
+                        w = maxWidth;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    // Keep PNG for small images (transparency), use JPEG for large
+                    const outType = (file.type === 'image/png' && w * h < 250000)
+                        ? 'image/png'
+                        : 'image/jpeg';
+                    resolve(canvas.toDataURL(outType, quality));
+                };
+                img.onerror = () => reject(new Error('Image load failed'));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+        });
     }
 };
 
