@@ -33,7 +33,11 @@ const Home = {
         document.getElementById('myStatusName').textContent = profile.nickname || 'sparkle';
 
         const quoteEl = document.getElementById('homeQuote');
-        if (quoteEl) quoteEl.textContent = s.homeQuote || 'So long as men can breathe or eyes can see, So long lives this, and this gives life to thee.';
+        if (quoteEl) quoteEl.textContent = s.homeQuote || 'I have crossed oceans of time to find you.';
+
+        // Location & Weather (decorative)
+        document.getElementById('homeLocation').textContent = profile.location || '';
+        document.getElementById('homeWeather').textContent = profile.weather || '';
 
         this.renderStatusSection();
     },
@@ -77,6 +81,20 @@ const Home = {
             });
         }
 
+        const locEl = document.getElementById('homeLocation');
+        if (locEl) {
+            locEl.addEventListener('dblclick', () => {
+                this.showInlineEdit(locEl, 'homeLocation');
+            });
+        }
+
+        const weaEl = document.getElementById('homeWeather');
+        if (weaEl) {
+            weaEl.addEventListener('dblclick', () => {
+                this.showInlineEdit(weaEl, 'homeWeather');
+            });
+        }
+
         inlineInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.commitInlineEdit(inlineInput);
@@ -117,7 +135,7 @@ const Home = {
         // For photo date, handled separately
         if (field === 'photoDate') return;
 
-        if (!value && field !== 'myStatus' && field !== 'countdownLabel' && field !== 'homeQuote') return;
+        if (!value && field !== 'myStatus' && field !== 'countdownLabel' && field !== 'homeQuote' && field !== 'homeLocation' && field !== 'homeWeather') return;
 
         switch (field) {
             case 'nickname':
@@ -159,7 +177,17 @@ const Home = {
             case 'homeQuote':
                 Data.updateSettings({ homeQuote: value });
                 const qEl = document.getElementById('homeQuote');
-                if (qEl) qEl.textContent = value || 'So long as men can breathe or eyes can see, So long lives this, and this gives life to thee.';
+                if (qEl) qEl.textContent = value || 'I have crossed oceans of time to find you.';
+                break;
+            case 'homeLocation':
+                Data.updateProfile({ location: value });
+                const lEl = document.getElementById('homeLocation');
+                if (lEl) lEl.textContent = value;
+                break;
+            case 'homeWeather':
+                Data.updateProfile({ weather: value });
+                const wEl = document.getElementById('homeWeather');
+                if (wEl) wEl.textContent = value;
                 break;
         }
     },
