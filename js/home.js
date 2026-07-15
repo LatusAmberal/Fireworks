@@ -171,20 +171,21 @@ const Home = {
 
         avatarWrap.addEventListener('click', () => avatarFileInput.click());
 
-        avatarFileInput.addEventListener('change', (e) => {
+        avatarFileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC72MB');
+            if (file.size > 10 * 1024 * 1024) {
+                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC710MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                Data.updateSettings({ myAvatar: ev.target.result, myAvatarEmoji: '' });
+            try {
+                const dataUrl = await Utils.compressImage(file, 256, 0.85);
+                Data.updateSettings({ myAvatar: dataUrl, myAvatarEmoji: '' });
                 App.applyAvatarSettings();
                 Utils.toast('\u5934\u50CF\u5DF2\u66F4\u65B0');
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                Utils.toast('\u56FE\u7247\u52A0\u8F7D\u5931\u8D25');
+            }
             e.target.value = '';
         });
     },
@@ -203,24 +204,25 @@ const Home = {
         myStatusAvatar.addEventListener('click', () => handleStatusAvatarClick('my'));
         otherStatusAvatar.addEventListener('click', () => handleStatusAvatarClick('other'));
 
-        statusAvatarFileInput.addEventListener('change', (e) => {
+        statusAvatarFileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC72MB');
+            if (file.size > 10 * 1024 * 1024) {
+                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC710MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (ev) => {
+            try {
+                const dataUrl = await Utils.compressImage(file, 256, 0.85);
                 if (Home._editingStatusAvatarTarget === 'my') {
-                    Data.updateSettings({ myAvatar: ev.target.result, myAvatarEmoji: '' });
+                    Data.updateSettings({ myAvatar: dataUrl, myAvatarEmoji: '' });
                 } else {
-                    Data.updateSettings({ otherAvatar: ev.target.result, otherAvatarEmoji: '' });
+                    Data.updateSettings({ otherAvatar: dataUrl, otherAvatarEmoji: '' });
                 }
                 App.applyAvatarSettings();
                 Utils.toast('\u5934\u50CF\u5DF2\u66F4\u65B0');
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                Utils.toast('\u56FE\u7247\u52A0\u8F7D\u5931\u8D25');
+            }
             e.target.value = '';
             Home._editingStatusAvatarTarget = null;
         });
@@ -527,35 +529,36 @@ const Home = {
             `;
             const photoInput = document.getElementById('photoWallInput');
             if (photoInput) {
-                photoInput.addEventListener('change', (e) => {
+                photoInput.addEventListener('change', async (e) => {
                     const files = e.target.files;
                     if (!files || files.length === 0) return;
                     let processed = 0;
                     const total = files.length;
                     for (let i = 0; i < files.length; i++) {
                         const file = files[i];
-                        if (file.size > 3 * 1024 * 1024) {
-                            Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC73MB');
+                        if (file.size > 20 * 1024 * 1024) {
+                            Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC720MB');
                             processed++;
                             continue;
                         }
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
+                        try {
+                            const dataUrl = await Utils.compressImage(file, 1280, 0.75);
                             const s = Data.getSettings();
                             if (!s.photoWall) s.photoWall = [];
                             s.photoWall.push({
-                                dataUrl: ev.target.result,
+                                dataUrl: dataUrl,
                                 addedAt: Date.now(),
                                 date: ''
                             });
                             Data.updateSettings({ photoWall: s.photoWall });
-                            processed++;
-                            if (processed >= total) {
-                                this.renderPhotoWall();
-                                Utils.toast('\u5DF2\u6DFB\u52A0\u7167\u7247');
-                            }
-                        };
-                        reader.readAsDataURL(file);
+                        } catch (err) {
+                            // skip failed image
+                        }
+                        processed++;
+                        if (processed >= total) {
+                            this.renderPhotoWall();
+                            Utils.toast('\u5DF2\u6DFB\u52A0\u7167\u7247');
+                        }
                     }
                     e.target.value = '';
                 });
@@ -666,22 +669,23 @@ const Home = {
             discImageInput.click();
         });
 
-        discImageInput.addEventListener('change', (e) => {
+        discImageInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC72MB');
+            if (file.size > 10 * 1024 * 1024) {
+                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC710MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (ev) => {
+            try {
+                const dataUrl = await Utils.compressImage(file, 512, 0.85);
                 const s = Data.getSettings();
-                s.musicPlayer.discImage = ev.target.result;
+                s.musicPlayer.discImage = dataUrl;
                 Data.updateSettings({ musicPlayer: s.musicPlayer });
                 this.renderMusicPlayer();
                 Utils.toast('\u5531\u7247\u56FE\u7247\u5DF2\u66F4\u65B0');
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                Utils.toast('\u56FE\u7247\u52A0\u8F7D\u5931\u8D25');
+            }
             e.target.value = '';
         });
 
