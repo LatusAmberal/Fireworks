@@ -417,8 +417,20 @@ const Data = {
         const g = this.data.groups.find(g => g.id === id);
         if (g) { g.name = name; this.save(); }
     },
+    reorderGroups(orderedIds) {
+        const newGroups = [];
+        orderedIds.forEach(id => {
+            const g = this.data.groups.find(g => g.id === id);
+            if (g) newGroups.push(g);
+        });
+        this.data.groups.forEach(g => {
+            if (!orderedIds.includes(g.id)) newGroups.push(g);
+        });
+        this.data.groups = newGroups;
+        this.save();
+    },
     deleteGroup(id) {
-        if (id === 'preset' || id === 'default') return false;
+        if (id === 'default') return false;
         this.data.groups = this.data.groups.filter(g => g.id !== id);
         this.data.cards.forEach(c => {
             if (c.group === id) c.group = null;
