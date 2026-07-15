@@ -269,7 +269,7 @@ const Settings = {
             App.applyAvatarSettings();
             this.renderTab('appearance');
             Utils.toast('\u5934\u50CF\u5DF2\u66F4\u65B0');
-        });
+        }, 256);
 
         this.bindImageUpload('otherAvatarFile', (dataUrl) => {
             Data.updateSettings({ otherAvatar: dataUrl, otherAvatarEmoji: '' });
@@ -277,7 +277,7 @@ const Settings = {
             App.applyAvatarSettings();
             this.renderTab('appearance');
             Utils.toast('\u5934\u50CF\u5DF2\u66F4\u65B0');
-        });
+        }, 256);
 
         // Home background upload
         this.bindImageUpload('homeBgFile', (dataUrl) => {
@@ -285,7 +285,7 @@ const Settings = {
             App.applyAvatarSettings();
             this.renderTab('appearance');
             Utils.toast('\u80CC\u666F\u5DF2\u66F4\u65B0');
-        });
+        }, 1920);
 
         // Card background upload
         this.bindImageUpload('cardBgFile', (dataUrl) => {
@@ -293,7 +293,7 @@ const Settings = {
             App.applyAvatarSettings();
             this.renderTab('appearance');
             Utils.toast('\u540D\u7247\u80CC\u666F\u5DF2\u66F4\u65B0');
-        });
+        }, 1920);
 
         const resetHomeBg = document.getElementById('resetHomeBg');
         if (resetHomeBg) {
@@ -318,28 +318,29 @@ const Settings = {
         // Photo wall
         const photoWallFile = document.getElementById('photoWallFileSettings');
         if (photoWallFile) {
-            photoWallFile.addEventListener('change', (e) => {
+            photoWallFile.addEventListener('change', async (e) => {
                 const files = e.target.files;
                 if (!files || files.length === 0) return;
-                const s = Data.getSettings();
-                if (!s.photoWall) s.photoWall = [];
                 let processed = 0;
                 const total = files.length;
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    if (file.size > 3 * 1024 * 1024) { processed++; continue; }
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        s.photoWall.push({ dataUrl: ev.target.result, addedAt: Date.now(), date: '' });
+                    if (file.size > 20 * 1024 * 1024) { processed++; continue; }
+                    try {
+                        const dataUrl = await Utils.compressImage(file, 1280, 0.75);
+                        const s = Data.getSettings();
+                        if (!s.photoWall) s.photoWall = [];
+                        s.photoWall.push({ dataUrl: dataUrl, addedAt: Date.now(), date: '' });
                         Data.updateSettings({ photoWall: s.photoWall });
-                        processed++;
-                        if (processed >= total) {
-                            this.renderTab('appearance');
-                            if (App.currentPage === 'home') Home.renderPhotoWall();
-                            Utils.toast('\u5DF2\u6DFB\u52A0\u7167\u7247');
-                        }
-                    };
-                    reader.readAsDataURL(file);
+                    } catch (err) {
+                        // skip failed image
+                    }
+                    processed++;
+                    if (processed >= total) {
+                        this.renderTab('appearance');
+                        if (App.currentPage === 'home') Home.renderPhotoWall();
+                        Utils.toast('\u5DF2\u6DFB\u52A0\u7167\u7247');
+                    }
                 }
                 e.target.value = '';
             });
@@ -372,19 +373,22 @@ const Settings = {
         });
     },
 
-    bindImageUpload(inputId, callback) {
+    bindImageUpload(inputId, callback, maxWidth = 1920) {
         const input = document.getElementById(inputId);
         if (!input) return;
-        input.addEventListener('change', (e) => {
+        input.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC72MB');
+            if (file.size > 10 * 1024 * 1024) {
+                Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC710MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (ev) => callback(ev.target.result);
-            reader.readAsDataURL(file);
+            try {
+                const dataUrl = await Utils.compressImage(file, maxWidth, 0.75);
+                callback(dataUrl);
+            } catch (err) {
+                Utils.toast('\u56FE\u7247\u52A0\u8F7D\u5931\u8D25');
+            }
         });
     },
 
@@ -945,7 +949,7 @@ const Settings = {
             this.renderTab('sound');
             if (App.currentPage === 'home') Home.renderMusicPlayer();
             Utils.toast('\u5531\u7247\u56FE\u7247\u5DF2\u66F4\u65B0');
-        });
+        }, 512);
     },
 
     _bindCustomSoundUpload(input, type) {
