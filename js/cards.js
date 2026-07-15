@@ -627,37 +627,85 @@ const Cards = {
         const groups = Data.getGroups().filter(g => g.id !== 'default');
 
         let html = '';
-        groups.forEach(g => {
-            const canDelete = g.id !== 'preset';
+        groups.forEach((g, idx) => {
             html += `
-                <div class="group-edit-row">
-                    <input type="text" value="${Utils.escapeHtml(g.name)}" data-group-id="${g.id}" ${g.id === 'preset' ? 'readonly' : ''}>
-                    <button class="rename-group" data-rename-id="${g.id}" title="重命名">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    </button>
-                    ${canDelete ? `<button class="delete-group" data-delete-group="${g.id}" title="删除">
+                <div class="group-edit-row" draggable="true" data-group-id="${g.id}" data-group-idx="${idx}">
+                    <span class="group-drag-handle" title="拖动排序">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+                    </span>
+                    <input type="text" value="${Utils.escapeHtml(g.name)}" data-group-id="${g.id}">
+                    <button class="delete-group" data-delete-group="${g.id}" title="删除">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>` : ''}
+                    </button>
                 </div>
             `;
         });
 
         list.innerHTML = html;
 
-        list.querySelectorAll('[data-rename-id]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.dataset.renameId;
-                const input = list.querySelector(`[data-group-id="${id}"]`);
+        // Inline rename: save on Enter or blur
+        list.querySelectorAll('input[data-group-id]').forEach(input => {
+            const save = () => {
+                const id = input.dataset.groupId;
                 const newName = input.value.trim();
-                if (newName) {
+                if (newName && newName !== (Data.getGroups().find(g => g.id === id) || {}).name) {
                     Data.renameGroup(id, newName);
                     this.renderGroupBar();
-                    this.renderGroupEditList();
                     Utils.toast('\u5206\u7EC4\u5DF2\u91CD\u547D\u540D');
+                } else if (!newName) {
+                    input.value = (Data.getGroups().find(g => g.id === id) || {}).name || '';
                 }
+            };
+            input.addEventListener('blur', save);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { input.blur(); }
             });
         });
 
+        // Drag-and-drop reorder
+        let dragSrcId = null;
+        list.querySelectorAll('.group-edit-row').forEach(row => {
+            row.addEventListener('dragstart', (e) => {
+                dragSrcId = row.dataset.groupId;
+                row.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', dragSrcId);
+            });
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                list.querySelectorAll('.group-edit-row').forEach(r => r.classList.remove('drag-over'));
+                dragSrcId = null;
+            });
+            row.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (row.dataset.groupId !== dragSrcId) {
+                    list.querySelectorAll('.group-edit-row').forEach(r => r.classList.remove('drag-over'));
+                    row.classList.add('drag-over');
+                }
+            });
+            row.addEventListener('dragleave', () => {
+                row.classList.remove('drag-over');
+            });
+            row.addEventListener('drop', (e) => {
+                e.preventDefault();
+                row.classList.remove('drag-over');
+                const targetId = row.dataset.groupId;
+                if (!dragSrcId || dragSrcId === targetId) return;
+                const groups = Data.getGroups().filter(g => g.id !== 'default');
+                const orderedIds = groups.map(g => g.id);
+                const srcIdx = orderedIds.indexOf(dragSrcId);
+                const tgtIdx = orderedIds.indexOf(targetId);
+                orderedIds.splice(srcIdx, 1);
+                orderedIds.splice(tgtIdx, 0, dragSrcId);
+                Data.reorderGroups(orderedIds);
+                this.renderGroupBar();
+                this.renderGroupEditList();
+                Utils.toast('\u6392\u5E8F\u5DF2\u66F4\u65B0');
+            });
+        });
+
+        // Delete
         list.querySelectorAll('[data-delete-group]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.deleteGroup;
@@ -670,20 +718,6 @@ const Cards = {
                     this.renderCards();
                     Utils.toast('\u5206\u7EC4\u5DF2\u5220\u9664');
                 });
-            });
-        });
-
-        list.querySelectorAll('input[data-group-id]').forEach(input => {
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const id = input.dataset.groupId;
-                    const newName = input.value.trim();
-                    if (newName) {
-                        Data.renameGroup(id, newName);
-                        this.renderGroupBar();
-                        Utils.toast('\u5206\u7EC4\u5DF2\u91CD\u547D\u540D');
-                    }
-                }
             });
         });
     },
