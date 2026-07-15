@@ -2085,21 +2085,22 @@ const ChatSettings = {
         // Chat background upload
         const chatBgFile = document.getElementById('chatBgFile');
         if (chatBgFile) {
-            chatBgFile.addEventListener('change', (e) => {
+            chatBgFile.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 2 * 1024 * 1024) {
-                    Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC72MB');
+                if (file.size > 10 * 1024 * 1024) {
+                    Utils.toast('\u56FE\u7247\u4E0D\u80FD\u8D85\u8FC710MB');
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    Data.updateSettings({ chatBackground: ev.target.result });
+                try {
+                    const dataUrl = await Utils.compressImage(file, 1920, 0.75);
+                    Data.updateSettings({ chatBackground: dataUrl });
                     App.applyChatBackground();
                     this.render();
                     Utils.toast('\u804A\u5929\u80CC\u666F\u5DF2\u66F4\u65B0');
-                };
-                reader.readAsDataURL(file);
+                } catch (err) {
+                    Utils.toast('\u56FE\u7247\u52A0\u8F7D\u5931\u8D25');
+                }
                 e.target.value = '';
             });
         }
