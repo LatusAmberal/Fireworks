@@ -440,6 +440,29 @@ html, body {
 }
 .profile-bio:hover { background: var(--bg-hover); }
 
+.profile-loc-weather {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 2px;
+    margin-bottom: -4px;
+}
+
+.profile-location,
+.profile-weather {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    opacity: 0.7;
+}
+
+.profile-location:hover,
+.profile-weather:hover { background: var(--bg-hover); opacity: 1; }
+
 /* Status + Countdown Row (side by side) */
 .home-status-row {
     display: flex;
@@ -1979,7 +2002,32 @@ html, body {
     gap: 8px;
     padding: 8px 0;
     border-bottom: 1px solid rgba(128,128,128,0.1);
+    cursor: default;
+    transition: background 0.15s;
 }
+.group-edit-row.dragging {
+    opacity: 0.4;
+}
+.group-edit-row.drag-over {
+    background: var(--bg-hover);
+    border-radius: var(--radius-sm);
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.group-drag-handle {
+    flex-shrink: 0;
+    width: 20px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: grab;
+    border-radius: 3px;
+    transition: color 0.15s;
+}
+.group-drag-handle:hover { color: var(--text-primary); }
+.group-drag-handle:active { cursor: grabbing; }
 .group-edit-row input {
     flex: 1;
     background: var(--bg-tertiary);
