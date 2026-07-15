@@ -335,7 +335,13 @@
             <div class="modal-overlay" id="addCardModal" style="display:none">
                 <div class="modal">
                     <div class="modal-header">添加字卡</div>
-                    <textarea class="add-card-textarea" id="addCardTextarea" placeholder="每行一条字卡&#10;用 {{翻译内容}} 添加翻译&#10;例如：你好 {{Hello}}"></textarea>
+                    <textarea class="add-card-textarea" id="addCardTextarea" placeholder="每行一条字卡&#10;用 {翻译内容} 添加翻译&#10;例如：你好 {Hello}"></textarea>
+                    <!-- Gift card add fields (hidden by default) -->
+                    <input type="text" class="edit-card-input" id="addCardGiftName" placeholder="礼物名称" style="display:none">
+                    <input type="text" class="edit-card-input" id="addCardGiftEmoji" placeholder="礼物 Emoji（如 💐）" style="display:none">
+                    <input type="text" class="edit-card-input" id="addCardGiftDesc" placeholder="礼物描述（可选）" style="display:none">
+                    <!-- Status card add field (hidden by default) -->
+                    <input type="text" class="edit-card-input" id="addCardStatusInput" placeholder="对方状态内容" style="display:none">
                     <div class="add-card-group-select" id="addCardGroupRow">
                         <label>分组：</label>
                         <div class="beautified-select-wrap">
