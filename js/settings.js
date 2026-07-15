@@ -438,6 +438,20 @@ const Settings = {
                     </div>
                     <input type="text" id="textHomeQuote" value="${Utils.escapeAttr(s.homeQuote || '')}" placeholder="\u8F93\u5165\u82F1\u8BED\u8BED\u5F55" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:13px;text-align:right;width:180px">
                 </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u4F4D\u7F6E</div>
+                        <div class="setting-desc">\u540D\u7247\u53F3\u4E0B\u89D2\u88C5\u9970\u6587\u5B57\uFF0C\u53CC\u51FB\u53EF\u5728\u4E3B\u9875\u7F16\u8F91</div>
+                    </div>
+                    <input type="text" id="textHomeLocation" value="${Utils.escapeAttr(profile.location || '')}" placeholder="\u5982\uFF1AShanghai" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:13px;text-align:right;width:130px">
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u5929\u6C14</div>
+                        <div class="setting-desc">\u540D\u7247\u53F3\u4E0B\u89D2\u88C5\u9970\u6587\u5B57\uFF0C\u53CC\u51FB\u53EF\u5728\u4E3B\u9875\u7F16\u8F91</div>
+                    </div>
+                    <input type="text" id="textHomeWeather" value="${Utils.escapeAttr(profile.weather || '')}" placeholder="\u5982\uFF1ASunny 25\u00B0C" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:13px;text-align:right;width:130px">
+                </div>
             </div>
 
             <div class="setting-group">
@@ -495,6 +509,8 @@ const Settings = {
             'textAnniversaryLabel': { fn: (v) => Data.updateProfile({ anniversaryLabel: v }) },
             'textMyStatus': { fn: (v) => Data.updateProfile({ myStatus: v }) },
             'textHomeQuote': { fn: (v) => Data.updateSettings({ homeQuote: v }) },
+            'textHomeLocation': { fn: (v) => Data.updateProfile({ location: v }) },
+            'textHomeWeather': { fn: (v) => Data.updateProfile({ weather: v }) },
             'textPeerNickname': { fn: (v) => Data.updatePeer({ nickname: v }) },
             'textMusicTitle': {
                 fn: (v) => {
