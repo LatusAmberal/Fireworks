@@ -264,7 +264,6 @@
 }
 
 html, body {
-    width: 100%;
     height: 100%;
     overflow: hidden;
     font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -272,27 +271,17 @@ html, body {
     color: var(--text-primary);
     user-select: none;
     -webkit-user-select: none;
-    margin: 0;
-    padding: 0;
-    /* 新增：防止 Safari 视口高度计算偏差 */
-    min-height: -webkit-fill-available;
 }
 
 #app {
-    padding-top: 0;
-    padding-bottom: 0;
     width: 100%;
+    height: 100vh;
+    height: 100dvh;
     position: relative;
     max-width: 720px;
     margin: 0 auto;
     background: var(--bg-primary);
     overflow: hidden;
-
-    /* 使用动态视口高度，解决移动端浏览器工具栏导致的偏移 */
-    height: 100vh;          /* fallback */
-    height: 100dvh;         /* 现代浏览器动态视口 */
-    min-height: 100dvh;
-    max-height: 100dvh;
 }
 
 /* ===== Pages ===== */
@@ -316,7 +305,7 @@ html, body {
 
 /* ===== Home Page ===== */
 #page-home {
-    overflow: hidden;
+    overflow: hidden auto;
     position: relative;
 }
 
@@ -335,45 +324,34 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 16px 20px;
-    padding-top: calc(20px + env(safe-area-inset-top));
-    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 120px);
+    padding: 20px 16px calc(var(--nav-height) + 20px);
+    padding-top: calc(20px + max(44px, env(safe-area-inset-top)));
     position: relative;
     z-index: 1;
     gap: 16px;
     overflow-y: auto;
-    justify-content: center;
+    min-height: 100%;
 }
 
-/* Home Quote (Shakespeare sonnet) */
-.home-quote {
+/* Top row: profile card + right column */
+.home-top-row {
+    display: flex;
+    gap: 12px;
     width: 100%;
     max-width: 540px;
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.6;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: opacity 0.2s;
-    word-break: break-word;
-}
-.home-quote:hover { opacity: 0.8; }
-
-/* Profile Card Row (full width) */
-.home-profile-row {
-    width: 100%;
-    max-width: 540px;
+    align-items: flex-start;
     flex-shrink: 0;
 }
 
-/* Profile Card */
+/* Profile Card - 60% */
 .profile-card {
-    width: 100%;
+    flex: 6;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .profile-card-bg {
@@ -440,13 +418,12 @@ html, body {
 }
 .profile-bio:hover { background: var(--bg-hover); }
 
-/* Status + Countdown Row (side by side) */
-.home-status-row {
+/* Right column - 40% */
+.home-right-col {
+    flex: 4;
     display: flex;
-    gap: 12px;
-    width: 100%;
-    max-width: 540px;
-    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
     flex-shrink: 0;
 }
 
@@ -467,8 +444,7 @@ html, body {
 
 /* ===== Status Section ===== */
 .status-section {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: 12px 12px;
@@ -476,6 +452,7 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .status-row {
@@ -547,12 +524,12 @@ html, body {
 
 /* ===== Countdown Card ===== */
 .countdown-card {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: 12px;
     box-shadow: var(--shadow);
+    flex-shrink: 0;
     text-align: center;
 }
 
@@ -587,7 +564,7 @@ html, body {
     width: 100%;
     max-width: 540px;
     background: transparent;
-    padding: 10px;
+    padding: 8px;
     flex-shrink: 0;
     flex: 1;
 }
@@ -797,15 +774,13 @@ html, body {
 /* ===== Navigation Bar ===== */
 .nav-bar {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: calc(var(--nav-height) + env(safe-area-inset-bottom));
-    padding-bottom: 0 12px env(safe-area-inset-bottom);
+    bottom: 0; left: 0; right: 0;
+    min-height: var(--nav-height);
     background: var(--bg-tertiary);
     display: flex;
     align-items: center;
     justify-content: space-around;
+    padding: 0 12px env(safe-area-inset-bottom);
     border-top: 1px solid rgba(0,0,0,0.2);
     z-index: 100;
     max-width: 720px;
@@ -845,11 +820,12 @@ html, body {
 
 /* ===== Sub Header ===== */
 .sub-header {
-    height: calc(var(--header-height) + env(safe-area-inset-top));
+    height: var(--header-height);
     background: var(--bg-secondary);
     display: flex;
     align-items: center;
-    padding: env(safe-area-inset-top) 12px 0;
+    padding: 0 12px;
+    padding-top: max(44px, env(safe-area-inset-top));
     border-bottom: 1px solid rgba(0,0,0,0.15);
     flex-shrink: 0;
     gap: 8px;
