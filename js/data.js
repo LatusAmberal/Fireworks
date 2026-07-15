@@ -1116,6 +1116,8 @@ const Utils = {
     notify(title, body) {
         if (!Data.getSettings().notifications) return;
         if (!('Notification' in window)) return;
+        // 页面在前台（用户正在使用）时不发送通知，仅后台时发送
+        if (document.visibilityState === 'visible') return;
         if (Notification.permission === 'granted') {
             new Notification(title, { body });
         }
