@@ -141,7 +141,10 @@ const Chat = {
                 const profile = Data.getProfile();
                 const myName = profile.nickname || 'sparkle';
                 const peerName = peer.nickname || 'shimmer';
-                const text = (patSettings.peerPatPrefix || '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A') + myName;
+                // Peer can pat user or pat themselves (50/50)
+                const target = Math.random() < 0.5 ? myName : peerName;
+                const suffix = target === myName ? (patSettings.patUserSuffix || '') : (patSettings.patPeerSuffix || '');
+                const text = peerName + '\u62CD\u4E86\u62CD' + target + suffix;
                 this.appendPatDivider(text, 'other');
                 this.isReplying = false;
                 this.lastSentTimestamp = Date.now();
@@ -756,16 +759,21 @@ const Chat = {
         const patSettings = settings.patSettings || {};
         const myName = profile.nickname || 'sparkle';
         const peerName = peer.nickname || 'shimmer';
-
-        let text;
+        // Format: {主语}拍了拍{对象}{后缀}
+        // 主语 is always the acting person's nickname
+        // 双击自己头像 → 拍自己；双击对方头像 → 拍对方
+        let subject, target;
         if (side === 'me') {
-            // User pats peer: {myName}拍了拍{peerName}的...
-            text = (patSettings.userPatPrefix || '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A') + peerName;
+            subject = myName;
+            target = myName;
         } else {
-            // User pats self (double-click own avatar): {myName}拍了拍{myName}的...
-            text = '\u4F60\u62CD\u4E86\u62CD\u81EA\u5DF1\u7684\uFF1A' + myName;
+            subject = myName;
+            target = peerName;
         }
+        // 后缀根据被拍对象选择
+        const suffix = target === myName ? (patSettings.patUserSuffix || '') : (patSettings.patPeerSuffix || '');
 
+        const text = subject + '\u62CD\u4E86\u62CD' + target + suffix;
         this.appendPatDivider(text, side);
 
         // Debounce
@@ -1801,19 +1809,19 @@ const ChatSettings = {
                         <span style="color:var(--text-muted)">%</span>
                     </div>
                 </div>
-                <div class="setting-item" id="patUserTextRow" style="${ps.enabled !== false ? '' : 'display:none'}">
+                <div class="setting-item" id="patUserSuffixRow" style="${ps.enabled !== false ? '' : 'display:none'}">
                     <div>
-                        <div class="setting-label">\u81EA\u5DF1\u62CD\u62CD\u6587\u6848</div>
-                        <div class="setting-desc">\u4F60\u53CC\u51FB\u5BF9\u65B9\u5934\u50CF\u65F6\u663E\u793A\u7684\u524D\u7F00\u6587\u6848</div>
+                        <div class="setting-label">\u6211\u88AB\u62CD\u540E\u7F00</div>
+                        <div class="setting-desc">\u88AB\u62CD\u5BF9\u8C61\u662F\u6211\u65F6\u9644\u52A0\u7684\u6587\u5B57</div>
                     </div>
-                    <input type="text" id="patUserPrefixInput" value="${Utils.escapeAttr(ps.userPatPrefix || '\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A')}" placeholder="\u4F60\u62CD\u4E86\u62CD\u5BF9\u65B9\u7684\uFF1A" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
+                    <input type="text" id="patUserSuffixInput" value="${Utils.escapeAttr(ps.patUserSuffix || '')}" placeholder="" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
                 </div>
-                <div class="setting-item" id="patPeerPrefixRow" style="${ps.enabled !== false ? '' : 'display:none'}">
+                <div class="setting-item" id="patPeerSuffixRow" style="${ps.enabled !== false ? '' : 'display:none'}">
                     <div>
-                        <div class="setting-label">\u5BF9\u65B9\u62CD\u62CD\u6587\u6848</div>
-                        <div class="setting-desc">\u5BF9\u65B9\u62CD\u4F60\u65F6\u663E\u793A\u7684\u524D\u7F00\u6587\u6848</div>
+                        <div class="setting-label">\u5BF9\u65B9\u88AB\u62CD\u540E\u7F00</div>
+                        <div class="setting-desc">\u88AB\u62CD\u5BF9\u8C61\u662F\u5BF9\u65B9\u65F6\u9644\u52A0\u7684\u6587\u5B57</div>
                     </div>
-                    <input type="text" id="patPeerPrefixInput" value="${Utils.escapeAttr(ps.peerPatPrefix || '\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A')}" placeholder="\u5BF9\u65B9\u62CD\u4E86\u62CD\u4F60\u7684\uFF1A" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
+                    <input type="text" id="patPeerSuffixInput" value="${Utils.escapeAttr(ps.patPeerSuffix || '')}" placeholder="" style="background:var(--bg-tertiary);border:none;border-radius:8px;padding:8px 12px;color:var(--text-primary);outline:none;font-size:14px;text-align:right;width:180px" ${ps.enabled !== false ? '' : 'disabled'}>
                 </div>
             </div>
 
@@ -1981,7 +1989,7 @@ const ChatSettings = {
         // Proactive interval (minutes)
         document.getElementById('proactiveMinInput').addEventListener('change', (e) => {
             let val = parseInt(e.target.value) || 1;
-            val = Math.max(1, Math.min(60, val));
+            val = Math.max(1, val);
             e.target.value = val;
             const maxVal = parseInt(document.getElementById('proactiveMaxInput').value);
             if (val > maxVal) {
@@ -1994,7 +2002,7 @@ const ChatSettings = {
 
         document.getElementById('proactiveMaxInput').addEventListener('change', (e) => {
             let val = parseInt(e.target.value) || 5;
-            val = Math.max(1, Math.min(60, val));
+            val = Math.max(1, val);
             e.target.value = val;
             const minVal = parseInt(document.getElementById('proactiveMinInput').value);
             if (val < minVal) {
@@ -2037,11 +2045,11 @@ const ChatSettings = {
             s.patSettings.enabled = on;
             Data.updateSettings({ patSettings: s.patSettings });
             // Hide/show related rows and disable inputs
-            ['patTriggerRow', 'patUserTextRow', 'patPeerPrefixRow'].forEach(id => {
+            ['patTriggerRow', 'patUserSuffixRow', 'patPeerSuffixRow'].forEach(id => {
                 const row = document.getElementById(id);
                 if (row) row.style.display = on ? '' : 'none';
             });
-            ['patTriggerInput', 'patUserPrefixInput', 'patPeerPrefixInput'].forEach(id => {
+            ['patTriggerInput', 'patUserSuffixInput', 'patPeerSuffixInput'].forEach(id => {
                 const inp = document.getElementById(id);
                 if (inp) inp.disabled = !on;
             });
@@ -2057,17 +2065,17 @@ const ChatSettings = {
             Data.updateSettings({ patSettings: s.patSettings });
         });
 
-        document.getElementById('patUserPrefixInput').addEventListener('change', (e) => {
+        document.getElementById('patUserSuffixInput').addEventListener('change', (e) => {
             const s = Data.getSettings();
             if (!s.patSettings) s.patSettings = {};
-            s.patSettings.userPatPrefix = e.target.value;
+            s.patSettings.patUserSuffix = e.target.value;
             Data.updateSettings({ patSettings: s.patSettings });
         });
 
-        document.getElementById('patPeerPrefixInput').addEventListener('change', (e) => {
+        document.getElementById('patPeerSuffixInput').addEventListener('change', (e) => {
             const s = Data.getSettings();
             if (!s.patSettings) s.patSettings = {};
-            s.patSettings.peerPatPrefix = e.target.value;
+            s.patSettings.patPeerSuffix = e.target.value;
             Data.updateSettings({ patSettings: s.patSettings });
         });
 
