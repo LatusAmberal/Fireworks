@@ -6,6 +6,7 @@ const Cards = {
     multiSelectMode: false,
     selectedCards: new Set(),
     editingCardId: null,
+    _pendingImportTxt: null,
 
     init() {
         this.currentFilter = Data.data.cardFilter || 'all';
@@ -14,6 +15,7 @@ const Cards = {
         document.getElementById('cardMultiBtn').addEventListener('click', () => this.toggleMultiSelect());
         document.getElementById('cardImportBtn').addEventListener('click', () => this.handleImport());
         document.getElementById('cardExportBtn').addEventListener('click', () => this.handleExport());
+        document.getElementById('cardDedupBtn').addEventListener('click', () => this.handleDedup());
 
         document.getElementById('addCardCancel').addEventListener('click', () => this.hideAddModal());
         document.getElementById('addCardConfirm').addEventListener('click', () => this.confirmAdd());
@@ -568,39 +570,108 @@ const Cards = {
         const reader = new FileReader();
         reader.onload = (e) => {
             const txt = e.target.result;
-            const lines = txt.split('\n');
-            let added = 0;
-            lines.forEach(line => {
-                const content = line.trim();
-                if (content && !content.startsWith('#')) {
-                    if (tab === 'gift') {
-                        const parts = content.split('|').map(s => s.trim());
-                        if (parts.length >= 2) {
-                            Data.addGiftCard(parts[0] || '\uD83C\uDF81', parts[1], parts[2] || '');
+
+            // For main tab, show import mode choice modal
+            if (tab === 'main') {
+                this._pendingImportTxt = txt;
+                this.showImportModeModal();
+            } else {
+                // Other tabs: import directly (always append)
+                const lines = txt.split('\n');
+                let added = 0;
+                lines.forEach(line => {
+                    const content = line.trim();
+                    if (content && !content.startsWith('#')) {
+                        if (tab === 'gift') {
+                            const parts = content.split('|').map(s => s.trim());
+                            if (parts.length >= 2) {
+                                Data.addGiftCard(parts[0] || '\uD83C\uDF81', parts[1], parts[2] || '');
+                                added++;
+                            } else if (parts.length === 1 && parts[0]) {
+                                Data.addGiftCard('\uD83C\uDF81', parts[0], '');
+                                added++;
+                            }
+                        } else if (tab === 'status') {
+                            Data.addStatusCard(content);
                             added++;
-                        } else if (parts.length === 1 && parts[0]) {
-                            Data.addGiftCard('\uD83C\uDF81', parts[0], '');
+                        } else if (tab === 'emoji') {
+                            Data.addEmojiCard(content);
                             added++;
                         }
-                    } else if (tab === 'status') Data.addStatusCard(content);
-                    else if (tab === 'emoji') Data.addEmojiCard(content);
-                    else {
-                        // Will be handled by importCardsTxt separately
                     }
-                    if (tab !== 'gift') added++;
-                }
-            });
-            if (tab === 'main') {
-                const count = Data.importCardsTxt(txt);
-                this.renderGroupBar();
-                Utils.toast(`\u5DF2\u5BFC\u5165 ${count} \u6761\u5B57\u5361`);
-            } else {
+                });
                 this.renderCards();
                 Utils.toast(`\u5DF2\u5BFC\u5165 ${added} \u6761`);
             }
         };
         reader.readAsText(file, 'UTF-8');
         event.target.value = '';
+    },
+
+    // ===== Import Mode Modal =====
+    showImportModeModal() {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.innerHTML = `
+            <div class="modal" style="max-width:380px">
+                <div class="modal-header">\u5BFC\u5165\u5B57\u5361</div>
+                <div class="confirm-dialog">
+                    <div class="confirm-text">\u8BF7\u9009\u62E9\u5BFC\u5165\u65B9\u5F0F\uFF1A</div>
+                </div>
+                <div class="modal-actions" style="flex-direction:column;gap:8px">
+                    <button class="btn-danger" id="importOverwrite" style="width:100%">\u8986\u76D6 \u2014 \u66FF\u6362\u5168\u90E8\u5B57\u5361</button>
+                    <button class="btn-primary" id="importAppend" style="width:100%">\u8FFD\u52A0 \u2014 \u53BB\u91CD\u540E\u6DFB\u52A0</button>
+                    <button class="btn-secondary" id="importCancel" style="width:100%">\u53D6\u6D88</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#importOverwrite').addEventListener('click', () => {
+            overlay.remove();
+            this.doImport(this._pendingImportTxt, 'overwrite');
+        });
+        overlay.querySelector('#importAppend').addEventListener('click', () => {
+            overlay.remove();
+            this.doImport(this._pendingImportTxt, 'append');
+        });
+        overlay.querySelector('#importCancel').addEventListener('click', () => {
+            overlay.remove();
+            this._pendingImportTxt = null;
+        });
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+                this._pendingImportTxt = null;
+            }
+        });
+    },
+
+    doImport(txt, mode) {
+        const count = Data.importCardsTxt(txt, mode);
+        this.renderGroupBar();
+        this.renderCards();
+        const modeText = mode === 'overwrite' ? '\u8986\u76D6' : '\u8FFD\u52A0';
+        Utils.toast(`\u5DF2${modeText}\u5BFC\u5165 ${count} \u6761\u5B57\u5361`);
+    },
+
+    handleDedup() {
+        const tab = this.currentCardTab;
+        let removed = 0;
+        switch (tab) {
+            case 'main': removed = Data.dedupCards(); break;
+            case 'status': removed = Data.dedupStatusCards(); break;
+            case 'emoji': removed = Data.dedupEmojiCards(); break;
+            case 'gift': removed = Data.dedupGiftCards(); break;
+        }
+        if (removed > 0) {
+            this.renderCards();
+            if (tab === 'main') this.renderGroupBar();
+            Utils.toast(`\u5DF2\u53BB\u9664 ${removed} \u6761\u91CD\u590D\u5B57\u5361`);
+        } else {
+            Utils.toast('\u6CA1\u6709\u53D1\u73B0\u91CD\u590D\u5B57\u5361');
+        }
     },
 
     // ===== Group Modal =====
