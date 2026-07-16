@@ -1012,7 +1012,7 @@ const Utils = {
     },
     // Probability distribution for number of cards - weighted toward single messages
     randomCardCount() {
-        const weights = [42, 36, 14, 5, 3]; // P(1)=42%, P(2)=36%, P(3)=14%, P(4)=5%, P(5)=3%
+        const weights = [47, 33, 12, 5, 3]; // P(1)=47%, P(2)=33%, P(3)=12%, P(4)=5%, P(5)=3%
         const total = weights.reduce((a,b) => a+b, 0);
         let r = Math.random() * total;
         for (let i = 0; i < weights.length; i++) {
