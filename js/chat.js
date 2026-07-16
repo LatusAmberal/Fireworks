@@ -15,6 +15,7 @@ const Chat = {
     _callTimer: null,
     _callStartTime: null,
     _inCall: false,
+    _replyDebounceTimer: null,
 
     init() {
         this.messagesContainer = document.getElementById('chatMessages');
@@ -107,19 +108,15 @@ const Chat = {
         const peer = Data.getPeer();
         const readDelay = Utils.randomFloat(peer.readDelayMin * 1000, peer.readDelayMax * 1000);
 
+        // Mark as read after read delay (per message, for UX)
         setTimeout(() => {
             msg.read = true;
             Data.save();
             this.updateReadStatus(msg.id);
-
-            if (peer.autoReply) {
-                // Fixed 2%-10% chance of no reply
-                const noReplyChance = Utils.randomFloat(0.02, 0.10);
-                if (Math.random() > noReplyChance) {
-                    this.triggerPeerReply();
-                }
-            }
         }, readDelay);
+
+        // Debounce reply: messages within 15s are treated as one batch
+        this._scheduleDebouncedReply();
     },
 
     triggerPeerReply() {
@@ -993,6 +990,10 @@ const Chat = {
                     Data.save();
                     this._updateRedPacketBubble(msg.id, 'rejected');
                 }
+
+                // Treat as user message: trigger reply after resolution
+                this.lastSentTimestamp = Date.now();
+                this._triggerReplyNow();
             }, Utils.randomInt(2000, 5000));
         });
     },
@@ -1104,6 +1105,10 @@ const Chat = {
                     Data.save();
                     this._updateGiftBubble(msg.id, 'rejected');
                 }
+
+                // Treat as user message: trigger reply after resolution
+                this.lastSentTimestamp = Date.now();
+                this._triggerReplyNow();
             }, Utils.randomInt(2000, 5000));
         });
     },
@@ -1666,6 +1671,36 @@ const Chat = {
                 }
             }
         }, 10000);
+    },
+
+    // Debounce reply trigger: messages within 15s are treated as one batch
+    _scheduleDebouncedReply() {
+        if (this._replyDebounceTimer) clearTimeout(this._replyDebounceTimer);
+        this._replyDebounceTimer = setTimeout(() => {
+            this._replyDebounceTimer = null;
+            this._tryTriggerReply();
+        }, 15000);
+    },
+
+    // Immediately trigger reply (used by gift/red packet resolution)
+    _triggerReplyNow() {
+        if (this._replyDebounceTimer) {
+            clearTimeout(this._replyDebounceTimer);
+            this._replyDebounceTimer = null;
+        }
+        this._tryTriggerReply();
+    },
+
+    // Check autoReply + noReplyChance, then trigger reply
+    _tryTriggerReply() {
+        const peer = Data.getPeer();
+        if (peer.autoReply) {
+            // Fixed 2%-10% chance of no reply
+            const noReplyChance = Utils.randomFloat(0.02, 0.10);
+            if (Math.random() > noReplyChance) {
+                this.triggerPeerReply();
+            }
+        }
     },
 
     scrollToBottom(instant = false) {
