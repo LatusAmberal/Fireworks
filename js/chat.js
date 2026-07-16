@@ -15,7 +15,8 @@ const Chat = {
     _callTimer: null,
     _callStartTime: null,
     _inCall: false,
-    _replyDebounceTimer: null,
+    _coalesceTimer: null,    // short window for grouping rapid messages
+    _replyTimer: null,        // readDelay-based reply trigger
 
     init() {
         this.messagesContainer = document.getElementById('chatMessages');
@@ -107,16 +108,22 @@ const Chat = {
 
         const peer = Data.getPeer();
         const readDelay = Utils.randomFloat(peer.readDelayMin * 1000, peer.readDelayMax * 1000);
+        const COALESCE_WINDOW = 500; // ms — short fixed window for grouping rapid messages
 
-        // Mark as read after read delay (per message, for UX)
-        setTimeout(() => {
-            msg.read = true;
-            Data.save();
-            this.updateReadStatus(msg.id);
-        }, readDelay);
+        // Clear both timers on each new message (resets grouping + reply delay)
+        if (this._coalesceTimer) clearTimeout(this._coalesceTimer);
+        if (this._replyTimer) clearTimeout(this._replyTimer);
 
-        // Debounce reply: messages within 15s are treated as one batch
-        this._scheduleDebouncedReply();
+        // Phase 1: coalesce rapid messages within a short window
+        this._coalesceTimer = setTimeout(() => {
+            this._coalesceTimer = null;
+            // Phase 2: after coalescing settles, wait readDelay before marking as read + replying
+            this._replyTimer = setTimeout(() => {
+                this._replyTimer = null;
+                this._markUnreadAsRead();
+                this._tryTriggerReply();
+            }, readDelay);
+        }, COALESCE_WINDOW);
     },
 
     triggerPeerReply() {
@@ -1673,21 +1680,10 @@ const Chat = {
         }, 10000);
     },
 
-    // Debounce reply trigger: messages within 15s are treated as one batch
-    _scheduleDebouncedReply() {
-        if (this._replyDebounceTimer) clearTimeout(this._replyDebounceTimer);
-        this._replyDebounceTimer = setTimeout(() => {
-            this._replyDebounceTimer = null;
-            this._tryTriggerReply();
-        }, 15000);
-    },
-
     // Immediately trigger reply (used by gift/red packet resolution)
     _triggerReplyNow() {
-        if (this._replyDebounceTimer) {
-            clearTimeout(this._replyDebounceTimer);
-            this._replyDebounceTimer = null;
-        }
+        if (this._coalesceTimer) { clearTimeout(this._coalesceTimer); this._coalesceTimer = null; }
+        if (this._replyTimer) { clearTimeout(this._replyTimer); this._replyTimer = null; }
         this._tryTriggerReply();
     },
 
