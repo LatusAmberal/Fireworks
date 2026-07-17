@@ -41,6 +41,11 @@ const App = {
         setInterval(() => {
             Data.save();
         }, 30000);
+
+        // Start keep-alive audio if enabled
+        if (Data.getSettings().keepAliveAudio) {
+            Utils.startKeepAlive();
+        }
     },
 
     bindNav() {
