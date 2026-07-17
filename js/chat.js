@@ -1955,7 +1955,7 @@ const ChatSettings = {
         // Min/Max delay
         document.getElementById('minDelayInput').addEventListener('change', (e) => {
             let val = parseFloat(e.target.value) || 2;
-            val = Math.max(1, Math.min(30, val));
+            val = Math.max(1, val);
             e.target.value = val;
             const maxVal = parseFloat(document.getElementById('maxDelayInput').value);
             if (val > maxVal) {
@@ -1968,7 +1968,7 @@ const ChatSettings = {
 
         document.getElementById('maxDelayInput').addEventListener('change', (e) => {
             let val = parseFloat(e.target.value) || 6;
-            val = Math.max(1, Math.min(30, val));
+            val = Math.max(1, val);
             e.target.value = val;
             const minVal = parseFloat(document.getElementById('minDelayInput').value);
             if (val < minVal) {
@@ -1982,7 +1982,7 @@ const ChatSettings = {
         // Read delay range
         document.getElementById('readDelayMinInput').addEventListener('change', (e) => {
             let val = parseFloat(e.target.value) || 0.3;
-            val = Math.max(0.1, Math.min(10, val));
+            val = Math.max(0.1, val);
             e.target.value = val;
             const maxVal = parseFloat(document.getElementById('readDelayMaxInput').value);
             if (val > maxVal) {
@@ -1995,7 +1995,7 @@ const ChatSettings = {
 
         document.getElementById('readDelayMaxInput').addEventListener('change', (e) => {
             let val = parseFloat(e.target.value) || 2;
-            val = Math.max(0.1, Math.min(10, val));
+            val = Math.max(0.1, val);
             e.target.value = val;
             const minVal = parseFloat(document.getElementById('readDelayMinInput').value);
             if (val < minVal) {
