@@ -124,6 +124,7 @@ const defaultData = {
         emojiMixEnabled: false,
         emojiMixProbability: 0.15,
         glassmorphism: false,
+        keepAliveAudio: false,
         musicPlayer: {
             discImage: '',
             audioUrl: 'https://videotourl.com/audio/1783941921708-3d60a063-2a43-4def-b80a-93d630a154e6.m4a',
@@ -1125,6 +1126,59 @@ const Utils = {
     requestNotifyPermission() {
         if (!('Notification' in window)) return Promise.resolve('unsupported');
         return Notification.requestPermission();
+    },
+
+    // ===== Background keep-alive audio (silent) =====
+    _keepAliveAudio: null,
+    _keepAliveUrl: null,
+
+    _generateSilentWavUrl() {
+        // Generate a 1-second silent WAV (8000Hz, 8-bit mono) as a blob URL
+        const sampleRate = 8000;
+        const numSamples = sampleRate;
+        const buffer = new ArrayBuffer(44 + numSamples);
+        const view = new DataView(buffer);
+        const writeStr = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+
+        writeStr(0, 'RIFF');
+        view.setUint32(4, 36 + numSamples, true);
+        writeStr(8, 'WAVE');
+        writeStr(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate, true);
+        view.setUint16(32, 1, true);
+        view.setUint16(34, 8, true);
+        writeStr(36, 'data');
+        view.setUint32(40, numSamples, true);
+        for (let i = 0; i < numSamples; i++) view.setUint8(44 + i, 128); // silence
+
+        return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+    },
+
+    startKeepAlive() {
+        if (this._keepAliveAudio) return; // already running
+        try {
+            if (!this._keepAliveUrl) this._keepAliveUrl = this._generateSilentWavUrl();
+            const audio = new Audio(this._keepAliveUrl);
+            audio.loop = true;
+            audio.volume = 0;
+            audio.play().catch(() => {});
+            this._keepAliveAudio = audio;
+        } catch(e) {}
+    },
+
+    stopKeepAlive() {
+        if (this._keepAliveAudio) {
+            this._keepAliveAudio.pause();
+            this._keepAliveAudio = null;
+        }
+    },
+
+    isKeepAliveRunning() {
+        return !!this._keepAliveAudio;
     },
     // Format bytes to human readable
     formatBytes(bytes) {
