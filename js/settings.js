@@ -858,6 +858,17 @@ const Settings = {
                     </label>
                 </div>
             </div>
+
+            <div class="setting-group">
+                <div class="setting-group-title">\u540E\u53F0\u4FDD\u6D3B</div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u4FDD\u6D3B\u97F3\u9891</div>
+                        <div class="setting-desc">\u64AD\u653E\u9759\u97F3\u97F3\u9891\uFF0C\u9632\u6B62\u6D4F\u89C8\u5668\u6302\u8D77\u540E\u53F0\u6807\u7B7E\u9875\uFF08\u4FDD\u6301\u6D88\u606F\u56DE\u590D\u6B63\u5E38\u8FD0\u884C\uFF09</div>
+                    </div>
+                    <div class="toggle ${s.keepAliveAudio ? 'on' : ''}" id="keepAliveToggle"></div>
+                </div>
+            </div>
         `;
     },
 
@@ -966,6 +977,20 @@ const Settings = {
             if (App.currentPage === 'home') Home.renderMusicPlayer();
             Utils.toast('\u5531\u7247\u56FE\u7247\u5DF2\u66F4\u65B0');
         }, 512);
+
+        // Keep-alive audio toggle
+        document.getElementById('keepAliveToggle').addEventListener('click', (e) => {
+            const on = !e.target.classList.contains('on');
+            e.target.classList.toggle('on', on);
+            Data.updateSettings({ keepAliveAudio: on });
+            if (on) {
+                Utils.startKeepAlive();
+                Utils.toast('\u540E\u53F0\u4FDD\u6D3B\u5DF2\u5F00\u542F');
+            } else {
+                Utils.stopKeepAlive();
+                Utils.toast('\u540E\u53F0\u4FDD\u6D3B\u5DF2\u5173\u95ED');
+            }
+        });
     },
 
     _bindCustomSoundUpload(input, type) {
