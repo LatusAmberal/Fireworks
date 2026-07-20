@@ -36,10 +36,14 @@ const Settings = {
             { id: 'sunset', name: '\u5F69\u971E', class: 'theme-sunset', group: 'dark' },
             { id: 'forest', name: '\u68EE\u6797', class: 'theme-forest', group: 'dark' },
             { id: 'rust', name: '\u7EA2\u9508', class: 'theme-rust', group: 'dark' },
+            { id: 'orange', name: '\u843D\u65E5', class: 'theme-orange', group: 'dark' },
+            { id: 'ins-dark', name: '\u7C89\u5F69', class: 'theme-ins-dark', group: 'dark' },
             { id: 'monochrome', name: '\u6781\u7B80\u9ED1\u767D', class: 'theme-monochrome', group: 'light' },
             { id: 'morandi', name: '\u83AB\u5170\u8FEA', class: 'theme-morandi', group: 'light' },
             { id: 'matcha', name: '\u62B9\u8336', class: 'theme-matcha', group: 'light' },
-            { id: 'sakura', name: '\u6A31\u82B1', class: 'theme-sakura', group: 'light' }
+            { id: 'sakura', name: '\u6A31\u82B1', class: 'theme-sakura', group: 'light' },
+            { id: 'skyblue', name: '\u6D77\u98CE', class: 'theme-skyblue', group: 'light' },
+            { id: 'paleyellow', name: '\u96CF\u83CA', class: 'theme-paleyellow', group: 'light' }
         ];
 
         const darkThemes = themes.filter(t => t.group === 'dark');
@@ -640,10 +644,24 @@ const Settings = {
                         <input type="file" accept=".json" id="importDataFile" style="display:none">
                     </label>
                 </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u5BFC\u51FA\u5916\u89C2\u6570\u636E</div>
+                        <div class="setting-desc">\u4EC5\u5BFC\u51FA\u4E3B\u9898\u3001\u80CC\u666F\u3001\u5934\u50CF\u7B49\u5916\u89C2\u8BBE\u7F6E</div>
+                    </div>
+                    <button class="btn-secondary btn-sm" id="exportAppearanceBtn">\u5BFC\u51FA</button>
+                </div>
             </div>
 
             <div class="setting-group">
                 <div class="setting-group-title">\u804A\u5929\u6570\u636E</div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">\u5BFC\u51FA\u804A\u5929\u8BB0\u5F55</div>
+                        <div class="setting-desc">\u4EC5\u5BFC\u51FA\u804A\u5929\u6D88\u606F\u548C\u5BF9\u65B9\u4FE1\u606F</div>
+                    </div>
+                    <button class="btn-secondary btn-sm" id="exportChatBtn">\u5BFC\u51FA</button>
+                </div>
                 <div class="setting-item">
                     <div>
                         <div class="setting-label">\u6E05\u9664\u804A\u5929\u8BB0\u5F55</div>
@@ -701,6 +719,34 @@ const Settings = {
             };
             reader.readAsText(file);
             e.target.value = '';
+        });
+
+        document.getElementById('exportChatBtn').addEventListener('click', () => {
+            const json = Data.exportChatData();
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fireworks_chat_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            Utils.toast('\u804A\u5929\u8BB0\u5F55\u5DF2\u5BFC\u51FA');
+        });
+
+        document.getElementById('exportAppearanceBtn').addEventListener('click', () => {
+            const json = Data.exportAppearanceData();
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fireworks_appearance_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            Utils.toast('\u5916\u89C2\u6570\u636E\u5DF2\u5BFC\u51FA');
         });
 
         document.getElementById('clearChatBtn').addEventListener('click', () => {
