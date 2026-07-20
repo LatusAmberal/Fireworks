@@ -775,6 +775,61 @@ const Data = {
     exportData() {
         return JSON.stringify(this.data, null, 2);
     },
+    exportChatData() {
+        const exportObj = {
+            _exportType: 'chat',
+            _exportDate: new Date().toISOString(),
+            messages: this.data.messages || [],
+            firstChatDate: this.data.firstChatDate || null,
+            peer: this.data.peer || {}
+        };
+        return JSON.stringify(exportObj, null, 2);
+    },
+    exportAppearanceData() {
+        const s = this.data.settings || {};
+        const p = this.data.profile || {};
+        const exportObj = {
+            _exportType: 'appearance',
+            _exportDate: new Date().toISOString(),
+            settings: {
+                theme: s.theme,
+                homeBackground: s.homeBackground,
+                cardBackground: s.cardBackground,
+                profileCardBg: s.profileCardBg,
+                chatBackground: s.chatBackground,
+                chatBackgroundOpacity: s.chatBackgroundOpacity,
+                chatBubbleStyle: s.chatBubbleStyle,
+                glassmorphism: s.glassmorphism,
+                customCSS: s.customCSS,
+                myAvatar: s.myAvatar,
+                myAvatarEmoji: s.myAvatarEmoji,
+                otherAvatar: s.otherAvatar,
+                otherAvatarEmoji: s.otherAvatarEmoji,
+                peerAvatar: s.peerAvatar,
+                peerAvatarEmoji: s.peerAvatarEmoji,
+                photoWall: s.photoWall || [],
+                musicPlayer: s.musicPlayer || {},
+                splashTitle: s.splashTitle,
+                splashSubtitle: s.splashSubtitle,
+                homeQuote: s.homeQuote
+            },
+            profile: {
+                avatar: p.avatar,
+                avatarEmoji: p.avatarEmoji,
+                background: p.background,
+                nickname: p.nickname,
+                bio: p.bio,
+                location: p.location,
+                weather: p.weather,
+                myStatus: p.myStatus,
+                anniversaryDate: p.anniversaryDate,
+                anniversaryType: p.anniversaryType,
+                anniversaryRepeat: p.anniversaryRepeat,
+                anniversaryLabel: p.anniversaryLabel
+            }
+        };
+        return JSON.stringify(exportObj, null, 2);
+    },
     importData(jsonStr) {
         try {
             const imported = JSON.parse(jsonStr);
