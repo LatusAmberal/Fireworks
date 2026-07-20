@@ -226,6 +226,78 @@
     --glass-border: rgba(90,58,64,0.12);
 }
 
+/* Orange theme - warm dark orange */
+[data-theme="orange"] {
+    --bg-primary: #1e1611;
+    --bg-secondary: #2a1e16;
+    --bg-tertiary: #15100c;
+    --bg-accent: #3a2818;
+    --bg-hover: #2e2218;
+    --text-primary: #f0e0d0;
+    --text-secondary: #c8a888;
+    --text-muted: #886848;
+    --blurple: #e67e22;
+    --blurple-hover: #d35400;
+    --bubble-me: linear-gradient(135deg, #e67e22, #f39c12);
+    --bubble-other: #2a1e16;
+    --glass-bg: rgba(42,30,22,0.55);
+    --glass-border: rgba(255,255,255,0.12);
+}
+
+/* INS Dark theme - minimalist Instagram-style dark */
+[data-theme="ins-dark"] {
+    --bg-primary: #121212;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #0a0a0a;
+    --bg-accent: #262626;
+    --bg-hover: #222222;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a8a8a8;
+    --text-muted: #666666;
+    --blurple: #e1306c;
+    --blurple-hover: #c13584;
+    --bubble-me: linear-gradient(135deg, #833ab4, #e1306c);
+    --bubble-other: #262626;
+    --glass-bg: rgba(18,18,18,0.6);
+    --glass-border: rgba(255,255,255,0.08);
+}
+
+/* Skyblue theme - light blue */
+[data-theme="skyblue"] {
+    --bg-primary: #eef6fc;
+    --bg-secondary: #e0eef8;
+    --bg-tertiary: #d4e6f4;
+    --bg-accent: #b8d4ea;
+    --bg-hover: #d8e6f2;
+    --text-primary: #2a4a60;
+    --text-secondary: #5070a0;
+    --text-muted: #8090b0;
+    --blurple: #4a9fd9;
+    --blurple-hover: #3a87bc;
+    --bubble-me: linear-gradient(135deg, #4a9fd9, #6bb6e8);
+    --bubble-other: #ddeaf5;
+    --glass-bg: rgba(238,246,252,0.55);
+    --glass-border: rgba(42,74,96,0.12);
+}
+
+/* Paleyellow theme - light warm yellow */
+[data-theme="paleyellow"] {
+    --bg-primary: #fefbf0;
+    --bg-secondary: #faf6e4;
+    --bg-tertiary: #f5f0da;
+    --bg-accent: #ece2b8;
+    --bg-hover: #f2ecce;
+    --text-primary: #4a3e20;
+    --text-secondary: #6b5d38;
+    --text-muted: #9a8c60;
+    --blurple: #d4a82e;
+    --blurple-hover: #b89020;
+    --bubble-me: linear-gradient(135deg, #d4a82e, #e8c04a);
+    --bubble-other: #f7f1de;
+    --glass-bg: rgba(254,251,240,0.55);
+    --glass-border: rgba(74,62,32,0.12);
+}
+
 /* Glassmorphism mode */
 [data-glass="true"] .profile-card,
 [data-glass="true"] .status-section,
@@ -2270,6 +2342,12 @@ html, body {
 .theme-matcha .theme-name { color: #3a4a30; text-shadow: none; }
 .theme-sakura { background: linear-gradient(135deg, #fdf5f6, #d4878e); }
 .theme-sakura .theme-name { color: #5a3a40; text-shadow: none; }
+.theme-orange { background: linear-gradient(135deg, #1e1611, #e67e22); }
+.theme-ins-dark { background: linear-gradient(135deg, #121212, #e1306c); }
+.theme-skyblue { background: linear-gradient(135deg, #eef6fc, #4a9fd9); }
+.theme-skyblue .theme-name { color: #2a4a60; text-shadow: none; }
+.theme-paleyellow { background: linear-gradient(135deg, #fefbf0, #d4a82e); }
+.theme-paleyellow .theme-name { color: #4a3e20; text-shadow: none; }
 
 /* Theme sections */
 .theme-section-label {
