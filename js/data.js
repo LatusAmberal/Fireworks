@@ -96,6 +96,7 @@ const defaultData = {
         { id: 'gc5', emoji: '\uD83C\uDF38', name: '\u5411\u65E5\u8475', description: '\u8FFD\u5BFB\u9633\u5149\u7684\u65B9\u5411\uFF0C\u5C31\u50CF\u8FFD\u5BFB\u4F60', blocked: false, usageCount: 0 },
         { id: 'gc6', emoji: '\u2B50', name: '\u6D41\u661F', description: '\u4E3A\u4F60\u6458\u4E0B\u7684\u90A3\u9897\u6700\u4EAE\u7684\u661F', blocked: false, usageCount: 0 }
     ],
+    stickerCards: [],
     settings: {
         theme: 'dark',
         sound: true,
@@ -151,7 +152,9 @@ const defaultData = {
             peerGiftProbability: 0.04,
             peerCallEnabled: true,
             peerTransferEnabled: true,
-            peerGiftEnabled: true
+            peerGiftEnabled: true,
+            peerStickerEnabled: true,
+            stickerReplyProbability: 0.3
         }
     },
     cardFilter: 'all',
@@ -287,6 +290,7 @@ const Data = {
         if (!this.data.cards) this.data.cards = defaultData.cards;
         if (!this.data.emojiCards) this.data.emojiCards = defaultData.emojiCards;
         if (!this.data.giftCards) this.data.giftCards = defaultData.giftCards;
+        if (!this.data.stickerCards) this.data.stickerCards = defaultData.stickerCards;
     },
 
     _runMigrations() {
@@ -388,6 +392,7 @@ const Data = {
         if (s.musicPlayer && s.musicPlayer.discImage) s.musicPlayer.discImage = '';
         if (s.photoWall) s.photoWall.forEach(p => { if (p.dataUrl) p.dataUrl = ''; });
         if (s.customSounds) s.customSounds.forEach(cs => { if (cs.dataUrl) cs.dataUrl = ''; });
+        if (clone.stickerCards) clone.stickerCards.forEach(sc => { if (sc.imageData) sc.imageData = ''; });
         return clone;
     },
 
@@ -716,6 +721,58 @@ const Data = {
         if (gc) gc.usageCount++;
         this.save();
         return { emoji: card.emoji, name: card.name, description: card.description || '' };
+    },
+
+    // Sticker Cards
+    getStickerCards() { return this.data.stickerCards || []; },
+    getActiveStickerCards() {
+        return (this.data.stickerCards || []).filter(c => !c.blocked);
+    },
+    addStickerCard(name, imageData) {
+        if (!this.data.stickerCards) this.data.stickerCards = [];
+        this.data.stickerCards.push({
+            id: 'sk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            name: name || '',
+            imageData: imageData || '',
+            blocked: false,
+            usageCount: 0,
+            createdAt: Date.now()
+        });
+        this.save();
+    },
+    updateStickerCard(id, updates) {
+        const card = (this.data.stickerCards || []).find(c => c.id === id);
+        if (card) { Object.assign(card, updates); this.save(); }
+    },
+    deleteStickerCard(id) {
+        if (!this.data.stickerCards) return;
+        this.data.stickerCards = this.data.stickerCards.filter(c => c.id !== id);
+        this.save();
+    },
+    deleteStickerCards(ids) {
+        if (!this.data.stickerCards) return;
+        const idSet = new Set(ids);
+        this.data.stickerCards = this.data.stickerCards.filter(c => !idSet.has(c.id));
+        this.save();
+    },
+    toggleStickerBlock(id) {
+        const card = (this.data.stickerCards || []).find(c => c.id === id);
+        if (card) { card.blocked = !card.blocked; this.save(); }
+    },
+    blockStickerCards(ids, blocked) {
+        if (!this.data.stickerCards) return;
+        const idSet = new Set(ids);
+        this.data.stickerCards.forEach(c => { if (idSet.has(c.id)) c.blocked = blocked; });
+        this.save();
+    },
+    pickRandomSticker() {
+        const active = this.getActiveStickerCards();
+        if (active.length === 0) return null;
+        const card = active[Math.floor(Math.random() * active.length)];
+        const sc = (this.data.stickerCards || []).find(c => c.id === card.id);
+        if (sc) sc.usageCount++;
+        this.save();
+        return { id: card.id, name: card.name, imageData: card.imageData };
     },
 
     // Settings
@@ -1249,6 +1306,14 @@ const Utils = {
                 reject(new Error('Not an image'));
                 return;
             }
+            // For GIFs, preserve animation by returning as-is (with size check)
+            if (file.type === 'image/gif') {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(file);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -1264,10 +1329,8 @@ const Utils = {
                     canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    // Keep PNG for small images (transparency), use JPEG for large
-                    const outType = (file.type === 'image/png' && w * h < 250000)
-                        ? 'image/png'
-                        : 'image/jpeg';
+                    // Keep PNG to preserve transparency; use JPEG for others
+                    const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
                     resolve(canvas.toDataURL(outType, quality));
                 };
                 img.onerror = () => reject(new Error('Image load failed'));
