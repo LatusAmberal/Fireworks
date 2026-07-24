@@ -167,23 +167,35 @@ const Chat = {
             }
 
             if (activeCards.length === 0 && mixEmojis.length === 0) {
-                Utils.toast('\u5B57\u5361\u5E93\u4E2D\u6CA1\u6709\u53EF\u7528\u7684\u5B57\u5361');
                 this.isReplying = false;
                 return;
             }
 
-            const count = Math.min(Utils.randomCardCount(), activeCards.length + mixEmojis.length);
+            // Sticker reply
+            let stickerCard = null;
+            const ds = settings.drawerSettings || {};
+            if (ds.peerStickerEnabled !== false) {
+                const activeStickers = Data.getActiveStickerCards();
+                if (activeStickers.length > 0 && Math.random() < (ds.stickerReplyProbability || 0.3)) {
+                    const picked = activeStickers[Math.floor(Math.random() * activeStickers.length)];
+                    stickerCard = { isSticker: true, stickerImage: picked.imageData, stickerName: picked.name || '' };
+                }
+            }
+
+            const count = Math.min(Utils.randomCardCount(), activeCards.length + mixEmojis.length + (stickerCard ? 1 : 0));
             let selectedCards;
 
             if (activeCards.length === 0) {
                 selectedCards = mixEmojis.slice(0, count).map(e => ({ content: e.content, isEmoji: true }));
-            } else if (mixEmojis.length === 0) {
+                if (stickerCard && count > selectedCards.length) selectedCards.push(stickerCard);
+            } else if (mixEmojis.length === 0 && !stickerCard) {
                 selectedCards = Utils.pickRandom(activeCards, count).map(c => ({ content: c.content, translation: c.translation || '', id: c.id }));
             } else {
-                const textCount = Math.max(1, count - mixEmojis.length);
+                const textCount = Math.max(1, count - mixEmojis.length - (stickerCard ? 1 : 0));
                 const textCards = Utils.pickRandom(activeCards, textCount).map(c => ({ content: c.content, translation: c.translation || '', id: c.id }));
-                const emojiToAdd = mixEmojis.slice(0, count - textCount);
-                selectedCards = Utils.shuffle([...textCards, ...emojiToAdd]).slice(0, count);
+                const extra = [...mixEmojis];
+                if (stickerCard) extra.push(stickerCard);
+                selectedCards = Utils.shuffle([...textCards, ...extra]).slice(0, count);
             }
 
             this.sendPeerMessages(selectedCards);
@@ -203,21 +215,38 @@ const Chat = {
             }
 
             const isEmoji = card.isEmoji || false;
-            const msg = {
-                id: Utils.uid(),
-                side: 'other',
-                content: card.content,
-                translation: (!isEmoji && card.translation) ? card.translation : '',
-                timestamp: Date.now(),
-                read: true,
-                isEmoji: isEmoji
-            };
+            const isSticker = card.isSticker || false;
+
+            let msg;
+            if (isSticker) {
+                msg = {
+                    id: Utils.uid(),
+                    side: 'other',
+                    content: '',
+                    translation: '',
+                    timestamp: Date.now(),
+                    read: true,
+                    isSticker: true,
+                    stickerImage: card.stickerImage,
+                    stickerName: card.stickerName || ''
+                };
+            } else {
+                msg = {
+                    id: Utils.uid(),
+                    side: 'other',
+                    content: card.content || '',
+                    translation: (!isEmoji && card.translation) ? card.translation : '',
+                    timestamp: Date.now(),
+                    read: true,
+                    isEmoji: isEmoji
+                };
+            }
             Data.addMessage(msg);
-            if (card.id && !isEmoji) Data.incrementUsage(card.id);
+            if (card.id && !isEmoji && !isSticker) Data.incrementUsage(card.id);
             this.appendMessage(msg, true);
             this.scrollToBottom();
             Utils.playSound('receive');
-            Utils.notify(Data.getPeer().nickname, card.content);
+            if (!isSticker) Utils.notify(Data.getPeer().nickname, card.content);
         }
     },
 
@@ -410,6 +439,57 @@ const Chat = {
             notice.className = 'reject-notice';
             notice.textContent = msg.content;
             row.appendChild(notice);
+            return row;
+        }
+
+        // Sticker message — no bubble, image only, but with avatar
+        if (msg.isSticker) {
+            const stickerWrap = document.createElement('div');
+            stickerWrap.className = 'msg-sticker';
+
+            const img = document.createElement('img');
+            img.src = msg.stickerImage || '';
+            img.alt = msg.stickerName || '';
+            stickerWrap.appendChild(img);
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'msg-delete-bubble';
+            deleteBtn.innerHTML = '\u00D7';
+            deleteBtn.title = '\u5220\u9664\u6D88\u606F';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteMessage(msg.id);
+            });
+            stickerWrap.appendChild(deleteBtn);
+
+            stickerWrap.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const wasVisible = deleteBtn.classList.contains('visible');
+                document.querySelectorAll('.msg-delete-bubble.visible').forEach(b => b.classList.remove('visible'));
+                if (!wasVisible) deleteBtn.classList.add('visible');
+            });
+
+            contentWrap.appendChild(stickerWrap);
+
+            if (msg.side === 'me') {
+                const meta = document.createElement('div');
+                meta.className = 'msg-meta';
+                const readStatus = document.createElement('span');
+                readStatus.className = 'msg-read-status ' + (msg.read ? 'read' : 'unread');
+                readStatus.textContent = msg.read ? '\u5DF2\u8BFB' : '\u672A\u8BFB';
+                readStatus.id = `read-${msg.id}`;
+                meta.appendChild(readStatus);
+                contentWrap.appendChild(meta);
+            }
+
+            if (msg.side === 'other') {
+                row.appendChild(avatarWrap);
+                row.appendChild(contentWrap);
+            } else {
+                row.appendChild(contentWrap);
+                row.appendChild(avatarWrap);
+            }
             return row;
         }
 
@@ -898,6 +978,11 @@ const Chat = {
             closeDrawer();
             this.showGiftModal();
         });
+
+        document.getElementById('drawerStickerIcon').addEventListener('click', () => {
+            closeDrawer();
+            this.showStickerModal();
+        });
     },
 
     // ===== Floating Modals =====
@@ -1117,6 +1202,74 @@ const Chat = {
                 this.lastSentTimestamp = Date.now();
                 this._triggerReplyNow();
             }, Utils.randomInt(2000, 5000));
+        });
+    },
+
+    showStickerModal() {
+        const stickers = Data.getStickerCards();
+        const body = document.getElementById('stickerPickerBody');
+        const picker = document.getElementById('stickerPicker');
+        const overlay = document.getElementById('stickerPickerOverlay');
+
+        if (stickers.length === 0) {
+            body.innerHTML = '<div class="sticker-picker-empty">\u8FD8\u6CA1\u6709\u8868\u60C5\u5305\uFF0C\u8BF7\u5148\u5728\u5B57\u5361\u5E93\u7684\u8868\u60C5\u5305\u9875\u6DFB\u52A0</div>';
+        } else {
+            body.innerHTML = stickers.map(s => `
+                <div class="sticker-picker-item" data-sticker-id="${s.id}" data-sticker-name="${Utils.escapeAttr(s.name || '')}" data-sticker-img="${Utils.escapeAttr(s.imageData || '')}">
+                    <img src="${s.imageData}" alt="${Utils.escapeHtml(s.name || '')}">
+                </div>
+            `).join('');
+        }
+
+        picker.style.display = 'flex';
+        overlay.style.display = 'block';
+
+        const closePicker = () => {
+            picker.style.display = 'none';
+            overlay.style.display = 'none';
+        };
+
+        overlay.onclick = closePicker;
+        document.getElementById('stickerPickerClose').onclick = closePicker;
+
+        // Click sticker to send
+        body.querySelectorAll('.sticker-picker-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const stickerId = item.dataset.stickerId;
+                const stickerName = item.dataset.stickerName;
+                const stickerImg = item.dataset.stickerImg;
+                closePicker();
+
+                const msg = {
+                    id: Utils.uid(),
+                    side: 'me',
+                    content: '',
+                    translation: '',
+                    timestamp: Date.now(),
+                    read: false,
+                    isSticker: true,
+                    stickerImage: stickerImg,
+                    stickerName: stickerName
+                };
+                Data.addMessage(msg);
+                this.appendMessage(msg, true);
+                this.scrollToBottom();
+                Utils.playSound('send');
+                // Trigger reply timer for sticker
+                this.lastSentTimestamp = Date.now();
+                const peer = Data.getPeer();
+                const readDelay = Utils.randomFloat(peer.readDelayMin * 1000, peer.readDelayMax * 1000);
+                if (this._coalesceTimer) clearTimeout(this._coalesceTimer);
+                if (this._replyTimer) clearTimeout(this._replyTimer);
+                this._coalesceTimer = setTimeout(() => {
+                    this._coalesceTimer = null;
+                    this._replyTimer = setTimeout(() => {
+                        this._replyTimer = null;
+                        this._markUnreadAsRead();
+                        this._tryTriggerReply();
+                    }, readDelay);
+                }, 500);
+            });
         });
     },
 
@@ -1820,6 +1973,29 @@ const ChatSettings = {
             </div>
 
             <div class="setting-group">
+                <div class="setting-group-title">\u8868\u60C5\u5305</div>
+                <div class="setting-item" id="peerStickerItem">
+                    <div>
+                        <div class="setting-label">\u5BF9\u65B9\u53EF\u53D1\u9001\u8868\u60C5\u5305</div>
+                        <div class="setting-desc">\u5BF9\u65B9\u56DE\u590D\u65F6\u6709\u6982\u7387\u53D1\u9001\u8868\u60C5\u5305</div>
+                    </div>
+                    <div class="chat-checkbox ${ds.peerStickerEnabled !== false ? 'checked' : ''}" id="peerStickerCheck">
+                        <div class="chat-checkbox-box"></div>
+                    </div>
+                </div>
+                <div class="setting-item" id="stickerProbRow" style="${ds.peerStickerEnabled !== false ? '' : 'display:none'}">
+                    <div>
+                        <div class="setting-label">\u8868\u60C5\u5305\u6982\u7387</div>
+                        <div class="setting-desc">\u5BF9\u65B9\u5728\u56DE\u590D\u4E2D\u53D1\u9001\u8868\u60C5\u5305\u7684\u6982\u7387</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px">
+                        <input type="number" id="stickerProbInput" value="${Math.round((ds.stickerReplyProbability || 0.3) * 100)}" min="5" max="100" step="5" style="width:55px;background:var(--bg-tertiary);border:none;border-radius:8px;padding:6px;color:var(--text-primary);outline:none;text-align:center" ${ds.peerStickerEnabled !== false ? '' : 'disabled'}>
+                        <span style="color:var(--text-muted)">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
                 <div class="setting-group-title">\u62CD\u4E00\u62CD</div>
                 <div class="setting-item" id="patEnabledItem">
                     <div>
@@ -2063,6 +2239,34 @@ const ChatSettings = {
             val = Math.max(5, Math.min(80, val));
             e.target.value = val;
             Data.updateSettings({ emojiMixProbability: val / 100 });
+        });
+
+        // Sticker settings
+        document.getElementById('peerStickerItem').addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            const cb = document.getElementById('peerStickerCheck');
+            const on = !cb.classList.contains('checked');
+            cb.classList.toggle('checked', on);
+            const s = Data.getSettings();
+            if (!s.drawerSettings) s.drawerSettings = {};
+            s.drawerSettings.peerStickerEnabled = on;
+            Data.updateSettings({ drawerSettings: s.drawerSettings });
+            const probRow = document.getElementById('stickerProbRow');
+            const probInput = document.getElementById('stickerProbInput');
+            probRow.style.display = on ? '' : 'none';
+            if (probInput) probInput.disabled = !on;
+        });
+        document.getElementById('stickerProbRow').addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+        });
+        document.getElementById('stickerProbInput').addEventListener('change', (e) => {
+            let val = parseInt(e.target.value) || 30;
+            val = Math.max(5, Math.min(100, val));
+            e.target.value = val;
+            const s = Data.getSettings();
+            if (!s.drawerSettings) s.drawerSettings = {};
+            s.drawerSettings.stickerReplyProbability = val / 100;
+            Data.updateSettings({ drawerSettings: s.drawerSettings });
         });
 
         // Pat settings
