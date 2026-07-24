@@ -353,6 +353,8 @@ html, body {
 #app {
     padding-top: 0;
     padding-bottom: 0;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
     width: 100%;
     position: relative;
     max-width: 720px;
@@ -691,7 +693,7 @@ html, body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 14px;
+    gap: 10px;
     min-height: 60px;
 }
 
@@ -714,14 +716,14 @@ html, body {
 }
 
 .polaroid img {
-    width: 68px;
-    height: 68px;
+    width: 56px;
+    height: 56px;
     object-fit: cover;
     display: block;
 }
 
 .polaroid .polaroid-date {
-    font-size: 9px;
+    font-size: 8px;
     color: #999;
     font-family: 'Georgia', serif;
     margin-top: 3px;
@@ -733,13 +735,13 @@ html, body {
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: var(--red);
     color: white;
     border: none;
     border-radius: 50%;
-    font-size: 11px;
+    font-size: 10px;
     cursor: pointer;
     display: none;
     align-items: center;
@@ -1278,6 +1280,7 @@ html, body {
 
 .chat-input {
     flex: 1;
+    min-width: 0;
     background: var(--bg-tertiary);
     border: none;
     border-radius: 22px;
@@ -2600,10 +2603,16 @@ html, body {
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ===== Scrollbar ===== */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
+/* Hide system scrollbars on all platforms (overlay scrollbars on mobile) */
+* {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE / Edge */
+}
+*::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
 
 /* Empty state */
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
