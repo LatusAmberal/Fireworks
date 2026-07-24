@@ -1762,6 +1762,9 @@ html, body {
     padding: 12px 10px 80px;
     align-content: start;
 }
+.cards-list.grid-layout.sticker-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
 .cards-list.grid-layout .card-item {
     flex-direction: column;
     justify-content: center;
