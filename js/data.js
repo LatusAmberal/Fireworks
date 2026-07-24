@@ -987,6 +987,29 @@ const Data = {
         this.save();
         return removed;
     },
+    swapAllCardsContentTranslation() {
+        let count = 0;
+        this.data.cards.forEach(c => {
+            if (c.translation) {
+                const tmp = c.content;
+                c.content = c.translation;
+                c.translation = tmp;
+                count++;
+            }
+        });
+        // Also swap content/translation in all chat messages
+        let msgCount = 0;
+        this.data.messages.forEach(m => {
+            if (m.translation) {
+                const tmp = m.content;
+                m.content = m.translation;
+                m.translation = tmp;
+                msgCount++;
+            }
+        });
+        this.save();
+        return { cards: count, messages: msgCount };
+    },
     dedupStatusCards() {
         const seen = new Set();
         const unique = [];
