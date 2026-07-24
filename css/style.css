@@ -2697,7 +2697,7 @@ html, body {
     box-shadow: var(--shadow-lg);
     z-index: 2000; opacity: 0;
     transition: 0.3s ease;
-    pointer-events: none; white-space: nowrap;
+    pointer-events: none; white-space: normal; text-align: center;
     max-width: 90%;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
