@@ -115,6 +115,7 @@ const Cards = {
         const tab = this.currentCardTab;
         if (tab === 'status') return Data.getStatusCards();
         if (tab === 'emoji') return Data.getEmojiCards();
+        if (tab === 'sticker') return Data.getStickerCards();
         if (tab === 'gift') return Data.getGiftCards();
         return this.currentFilter === 'all' ? Data.getCards() : Data.getCardsByGroup(this.currentFilter);
     },
@@ -135,12 +136,12 @@ const Cards = {
             editGroupRow.style.display = 'flex';
         }
 
-        const tabLabel = tab === 'status' ? '\u72B6\u6001\u5B57\u5361' : (tab === 'emoji' ? 'Emoji' : (tab === 'gift' ? '\u793C\u7269' : '\u5B57\u5361'));
+        const tabLabel = tab === 'status' ? '\u72B6\u6001\u5B57\u5361' : (tab === 'emoji' ? 'Emoji' : (tab === 'gift' ? '\u793C\u7269' : (tab === 'sticker' ? '\u8868\u60C5\u5305' : '\u5B57\u5361')));
 
         if (cards.length === 0) {
             list.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">${tab === 'emoji' ? '\uD83D\uDE00' : (tab === 'gift' ? '\uD83C\uDF81' : '\uD83D\uDCE6')}</div>
+                    <div class="empty-state-icon">${tab === 'emoji' ? '\uD83D\uDE00' : (tab === 'gift' ? '\uD83C\uDF81' : (tab === 'sticker' ? '\uD83E\uDD73' : '\uD83D\uDCE6'))}</div>
                     <p>\u6682\u65E0${tabLabel}</p>
                     <p style="font-size:13px;margin-top:4px">\u70B9\u51FB\u53F3\u4E0A\u89D2 + \u6DFB\u52A0${tabLabel}</p>
                 </div>
@@ -149,6 +150,7 @@ const Cards = {
         }
 
         const isGrid = tab !== 'main';
+        const isSticker = tab === 'sticker';
         list.className = 'cards-list' + (this.multiSelectMode ? ' multi-select' : '') + (isGrid ? ' grid-layout' : '');
 
         let html = '';
@@ -176,6 +178,23 @@ const Cards = {
                             </button>
                             <button class="card-action-btn edit" data-action="edit" data-id="${card.id}" title="\u4FEE\u6539">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="card-action-btn delete" data-action="delete" data-id="${card.id}" title="\u5220\u9664">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (isSticker) {
+                html += `
+                    <div class="card-item sticker-card ${card.blocked ? 'blocked' : ''} ${isSelected ? 'selected' : ''}" data-card-id="${card.id}">
+                        <div class="card-checkbox ${isSelected ? 'checked' : ''}"></div>
+                        <div class="card-content-wrap">
+                            <img class="sticker-card-img" src="${card.imageData || ''}" alt="${Utils.escapeHtml(card.name || '')}">
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn block ${card.blocked ? 'blocked' : ''}" data-action="block" data-id="${card.id}" title="${card.blocked ? '\u89E3\u9664\u5C4F\u853D' : '\u5C4F\u853D'}">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                             </button>
                             <button class="card-action-btn delete" data-action="delete" data-id="${card.id}" title="\u5220\u9664">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -221,9 +240,18 @@ const Cards = {
                     if (tab === 'status') Data.toggleStatusBlock(cardId);
                     else if (tab === 'emoji') Data.toggleEmojiBlock(cardId);
                     else if (tab === 'gift') Data.toggleGiftBlock(cardId);
+                    else if (tab === 'sticker') {
+                        Data.toggleStickerBlock(cardId);
+                        const card = Data.getStickerCards().find(c => c.id === cardId);
+                        if (card && card.blocked) {
+                            Utils.toast('屏蔽后对方回复时无法抽取此表情包，但你仍可以正常发送');
+                        } else {
+                            Utils.toast('已更新屏蔽状态');
+                        }
+                    }
                     else Data.toggleBlock(cardId);
                     this.renderCards();
-                    Utils.toast('\u5DF2\u66F4\u65B0\u5C4F\u853D\u72B6\u6001');
+                    if (tab !== 'sticker') Utils.toast('\u5DF2\u66F4\u65B0\u5C4F\u853D\u72B6\u6001');
                 });
 
                 item.querySelector('[data-action="edit"]')?.addEventListener('click', (e) => {
@@ -257,6 +285,10 @@ const Cards = {
         if (giftEmoji) { giftEmoji.style.display = 'none'; giftEmoji.value = ''; }
         if (giftDesc) { giftDesc.style.display = 'none'; giftDesc.value = ''; }
         if (statusInput) { statusInput.style.display = 'none'; statusInput.value = ''; }
+        const stickerFile = document.getElementById('addCardStickerFile');
+        if (stickerFile) { stickerFile.style.display = 'none'; stickerFile.value = ''; }
+        const uploadArea = document.getElementById('stickerUploadArea');
+        if (uploadArea) uploadArea.style.display = 'none';
 
         if (tab !== 'main') {
             groupRow.style.display = 'none';
@@ -280,9 +312,38 @@ const Cards = {
             modal.querySelector('.modal-header').textContent = '添加对方状态';
             setTimeout(() => { if (statusInput) statusInput.focus(); }, 100);
         } else if (tab === 'emoji') {
-            textarea.placeholder = '每行一个 Emoji，可以是单个也可以是多个：😂 👍';
+            textarea.placeholder = '每行一个 Emoji，可以是单个也可以是多个：😂 \uD83D\uDC4D';
             modal.querySelector('.modal-header').textContent = '添加 Emoji';
             setTimeout(() => textarea.focus(), 100);
+        } else if (tab === 'sticker') {
+            textarea.style.display = 'none';
+            modal.querySelector('.modal-header').textContent = '上传表情包';
+            const uploadArea = document.getElementById('stickerUploadArea');
+            const uploadBox = document.getElementById('stickerUploadBox');
+            const fileInput = document.getElementById('addCardStickerFile');
+            const preview = document.getElementById('stickerUploadPreview');
+            const previewImg = document.getElementById('stickerUploadPreviewImg');
+            const filename = document.getElementById('stickerUploadFilename');
+            if (uploadArea) uploadArea.style.display = 'block';
+            if (fileInput) fileInput.value = '';
+            if (preview) preview.style.display = 'none';
+            if (previewImg) previewImg.src = '';
+            if (filename) filename.textContent = '';
+            // Bind upload box click
+            if (uploadBox && fileInput) {
+                uploadBox.onclick = () => fileInput.click();
+            }
+            // Bind file change for preview
+            if (fileInput) {
+                fileInput.onchange = () => {
+                    const file = fileInput.files[0];
+                    if (file && preview && previewImg && filename) {
+                        preview.style.display = 'block';
+                        previewImg.src = URL.createObjectURL(file);
+                        filename.textContent = file.name;
+                    }
+                };
+            }
         } else {
             textarea.placeholder = '每行一条字卡\n用 {翻译内容} 添加翻译\n例如：你好 {Hello}';
             modal.querySelector('.modal-header').textContent = '添加字卡';
@@ -331,6 +392,27 @@ const Cards = {
                     added++;
                 }
             });
+        } else if (tab === 'sticker') {
+            const fileInput = document.getElementById('addCardStickerFile');
+            if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                Utils.toast('请选择图片文件');
+                return;
+            }
+            const file = fileInput.files[0];
+            if (file.size > 20 * 1024 * 1024) {
+                Utils.toast('文件不能超过20MB');
+                return;
+            }
+            Utils.compressImage(file, 512, 0.7).then(dataUrl => {
+                const name = (file.name || '').replace(/\.[^.]+$/, '').slice(0, 30) || '表情包';
+                Data.addStickerCard(name, dataUrl);
+                this.hideAddModal();
+                this.renderCards();
+                Utils.toast('表情包已添加');
+            }).catch(() => {
+                Utils.toast('图片处理失败');
+            });
+            return; // async, don't continue with sync flow
         } else {
             const text = document.getElementById('addCardTextarea').value;
             if (!text.trim()) {
@@ -355,6 +437,7 @@ const Cards = {
         if (tab === 'status') card = Data.getStatusCards().find(c => c.id === cardId);
         else if (tab === 'emoji') card = Data.getEmojiCards().find(c => c.id === cardId);
         else if (tab === 'gift') card = Data.getGiftCards().find(c => c.id === cardId);
+        else if (tab === 'sticker') card = Data.getStickerCards().find(c => c.id === cardId);
         else card = Data.getCards().find(c => c.id === cardId);
         if (!card) return;
 
@@ -442,14 +525,16 @@ const Cards = {
         if (tab === 'status') card = Data.getStatusCards().find(c => c.id === cardId);
         else if (tab === 'emoji') card = Data.getEmojiCards().find(c => c.id === cardId);
         else if (tab === 'gift') card = Data.getGiftCards().find(c => c.id === cardId);
+        else if (tab === 'sticker') card = Data.getStickerCards().find(c => c.id === cardId);
         else card = Data.getCards().find(c => c.id === cardId);
         if (!card) return;
 
-        const label = tab === 'gift' ? card.name : (tab === 'emoji' ? card.content : card.content);
+        const label = tab === 'gift' ? card.name : (tab === 'sticker' ? (card.name || '\u8868\u60C5\u5305') : (tab === 'emoji' ? card.content : card.content));
         this.showConfirmDialog('\u5220\u9664', `\u786E\u5B9A\u5220\u9664"${label}"\u5417\uFF1F`, () => {
             if (tab === 'status') Data.deleteStatusCard(cardId);
             else if (tab === 'emoji') Data.deleteEmojiCard(cardId);
             else if (tab === 'gift') Data.deleteGiftCard(cardId);
+            else if (tab === 'sticker') Data.deleteStickerCard(cardId);
             else Data.deleteCard(cardId);
             this.renderCards();
             if (tab === 'main') this.renderGroupBar();
@@ -491,6 +576,7 @@ const Cards = {
             if (tab === 'status') Data.deleteStatusCards(ids);
             else if (tab === 'emoji') Data.deleteEmojiCards(ids);
             else if (tab === 'gift') Data.deleteGiftCards(ids);
+            else if (tab === 'sticker') Data.deleteStickerCards(ids);
             else Data.deleteCards(ids);
             this.selectedCards.clear();
             this.toggleMultiSelect(false);
@@ -506,6 +592,7 @@ const Cards = {
         if (tab === 'status') Data.blockStatusCards(ids, true);
         else if (tab === 'emoji') Data.blockEmojiCards(ids, true);
         else if (tab === 'gift') Data.blockGiftCards(ids, true);
+        else if (tab === 'sticker') Data.blockStickerCards(ids, true);
         else Data.blockCards(ids, true);
         this.selectedCards.clear();
         this.toggleMultiSelect(false);
