@@ -16,6 +16,7 @@ const Cards = {
         document.getElementById('cardImportBtn').addEventListener('click', () => this.handleImport());
         document.getElementById('cardExportBtn').addEventListener('click', () => this.handleExport());
         document.getElementById('cardDedupBtn').addEventListener('click', () => this.handleDedup());
+        document.getElementById('cardSwapBtn').addEventListener('click', () => this.handleSwap());
 
         document.getElementById('addCardCancel').addEventListener('click', () => this.hideAddModal());
         document.getElementById('addCardConfirm').addEventListener('click', () => this.confirmAdd());
@@ -57,6 +58,7 @@ const Cards = {
     },
 
     onShow() {
+        document.getElementById('cardSwapBtn').style.display = this.currentCardTab === 'main' ? '' : 'none';
         this.renderGroupBar();
         this.renderCards();
     },
@@ -790,6 +792,17 @@ const Cards = {
         } else {
             Utils.toast('\u6CA1\u6709\u53D1\u73B0\u91CD\u590D\u5B57\u5361');
         }
+    },
+
+    handleSwap() {
+        const cards = Data.getCards();
+        if (cards.length === 0) { Utils.toast('\u6CA1\u6709\u5B57\u5361\u53EF\u4EA4\u6362'); return; }
+        this.showConfirmDialog('\u4EA4\u6362\u6B63\u6587/\u8BD1\u6587', `\u5C06\u4EA4\u6362\u5168\u90E8 ${cards.length} \u5F20\u4E3B\u5B57\u5361\u7684\u6B63\u6587\u548C\u8BD1\u6587\uFF0C\u540C\u65F6\u4EA4\u6362\u804A\u5929\u8BB0\u5F55\u4E2D\u7684\u6D88\u606F\uFF0C\u786E\u5B9A\u5417\uFF1F`, () => {
+            const result = Data.swapAllCardsContentTranslation();
+            this.renderCards();
+            if (typeof Chat !== 'undefined' && Chat.renderAllMessages) Chat.renderAllMessages();
+            Utils.toast(`\u5DF2\u4EA4\u6362 ${result.cards} \u5F20\u5B57\u5361\u3001${result.messages} \u6761\u6D88\u606F`);
+        });
     },
 
     // ===== Group Modal =====
