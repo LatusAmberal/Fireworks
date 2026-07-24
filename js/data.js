@@ -314,40 +314,6 @@ const Data = {
             this.save();
         }
 
-        // Migration: swap card content/translation (content=English, translation=Chinese)
-        if (!this.data._migratedCardSwap) {
-            const presetMap = {
-                'c1': { content: 'Hello there!', translation: '你好呀！' },
-                'c2': { content: 'How was your day?', translation: '今天过得怎么样？' },
-                'c3': { content: 'Good night, sweet dreams', translation: '晚安，做个好梦' },
-                'c4': { content: 'What did you have for lunch?', translation: '中午吃了什么？' },
-                'c5': { content: 'Long time no see!', translation: '好久不见！' },
-                'c6': { content: 'Hahaha, that is hilarious', translation: '哈哈哈太搞笑了' },
-                'c7': { content: 'That is exactly what I think', translation: '我也是这么想的' },
-                'c8': { content: 'That is just outrageous', translation: '这也太离谱了吧' },
-                'c9': { content: 'You make a good point', translation: '你说的有道理' },
-                'c10': { content: 'I am listening, go on', translation: '我在听，继续说' },
-                'c11': { content: 'I see', translation: '原来如此' },
-                'c12': { content: 'Yeah, and then?', translation: '嗯嗯，然后呢？' },
-                'c13': { content: 'Wow, that is amazing!', translation: '哇，好厉害！' },
-                'c14': { content: 'Let us cheer each other on', translation: '我们一起加油吧' },
-                'c15': { content: 'Do not forget to rest', translation: '别忘了休息哦' }
-            };
-            this.data.cards.forEach(c => {
-                if (presetMap[c.id]) {
-                    c.content = presetMap[c.id].content;
-                    c.translation = presetMap[c.id].translation;
-                } else if (c.translation && c.content !== c.translation) {
-                    // Swap content and translation for user cards
-                    const tmp = c.content;
-                    c.content = c.translation;
-                    c.translation = tmp;
-                }
-            });
-            this.data._migratedCardSwap = true;
-            this.save();
-        }
-
         // Migration: remove 'default' group from groups array (keep as virtual)
         if (!this.data._migratedDefaultGroup) {
             this.data.groups = this.data.groups.filter(g => g.id !== 'default');
