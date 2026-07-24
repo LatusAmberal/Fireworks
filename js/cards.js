@@ -151,7 +151,7 @@ const Cards = {
 
         const isGrid = tab !== 'main';
         const isSticker = tab === 'sticker';
-        list.className = 'cards-list' + (this.multiSelectMode ? ' multi-select' : '') + (isGrid ? ' grid-layout' : '');
+        list.className = 'cards-list' + (this.multiSelectMode ? ' multi-select' : '') + (isGrid ? ' grid-layout' : '') + (isSticker ? ' sticker-grid' : '');
 
         let html = '';
         cards.forEach(card => {
