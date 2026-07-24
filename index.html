@@ -263,10 +263,14 @@
                     <button class="chat-drawer-close" id="chatDrawerClose">&times;</button>
                 </div>
                 <div class="chat-drawer-body">
-                    <div class="drawer-icon-grid">
+                    <div class="drawer-icon-grid" id="drawerIconGrid">
                         <div class="drawer-icon-item" id="drawerMultiMsgIcon">
                             <div class="drawer-icon">📨</div>
                             <div class="drawer-icon-label">发送多消息</div>
+                        </div>
+                        <div class="drawer-icon-item" id="drawerStickerIcon">
+                            <div class="drawer-icon">🥳</div>
+                            <div class="drawer-icon-label">表情包</div>
                         </div>
                         <div class="drawer-icon-item" id="drawerCallIcon">
                             <div class="drawer-icon">📞</div>
@@ -282,6 +286,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Sticker picker modal -->
+            <div class="sticker-picker-overlay" id="stickerPickerOverlay" style="display:none"></div>
+            <div class="sticker-picker" id="stickerPicker" style="display:none">
+                <div class="sticker-picker-header">
+                    <span>表情包</span>
+                    <button class="sticker-picker-close" id="stickerPickerClose">&times;</button>
+                </div>
+                <div class="sticker-picker-body" id="stickerPickerBody"></div>
             </div>
         </div>
 
@@ -327,6 +340,7 @@
                 <div class="cards-tab active" data-card-tab="main">主字卡</div>
                 <div class="cards-tab" data-card-tab="status">对方状态</div>
                 <div class="cards-tab" data-card-tab="emoji">Emoji</div>
+                <div class="cards-tab" data-card-tab="sticker">表情包</div>
                 <div class="cards-tab" data-card-tab="gift">礼物</div>
             </div>
             <div class="cards-group-bar" id="cardsGroupBar"></div>
@@ -340,9 +354,22 @@
                     <input type="text" class="edit-card-input" id="addCardGiftName" placeholder="礼物名称" style="display:none">
                     <input type="text" class="edit-card-input" id="addCardGiftEmoji" placeholder="礼物 Emoji（如 💐）" style="display:none">
                     <input type="text" class="edit-card-input" id="addCardGiftDesc" placeholder="礼物描述（可选）" style="display:none">
-                    <!-- Status card add field (hidden by default) -->
-                    <input type="text" class="edit-card-input" id="addCardStatusInput" placeholder="对方状态内容" style="display:none">
-                    <div class="add-card-group-select" id="addCardGroupRow">
+            <!-- Status card add field (hidden by default) -->
+            <input type="text" class="edit-card-input" id="addCardStatusInput" placeholder="对方状态内容" style="display:none">
+            <!-- Sticker upload area (hidden by default) -->
+            <div class="sticker-upload-area" id="stickerUploadArea" style="display:none">
+                <input type="file" id="addCardStickerFile" accept="image/*" style="display:none">
+                <div class="sticker-upload-box" id="stickerUploadBox">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <div class="sticker-upload-title">点击或拖拽上传表情包</div>
+                    <div class="sticker-upload-hint">支持 JPG、PNG、GIF 格式，最大 20MB</div>
+                </div>
+                <div class="sticker-upload-preview" id="stickerUploadPreview" style="display:none">
+                    <img id="stickerUploadPreviewImg" src="" alt="">
+                    <div class="sticker-upload-filename" id="stickerUploadFilename"></div>
+                </div>
+            </div>
+            <div class="add-card-group-select" id="addCardGroupRow">
                         <label>分组：</label>
                         <div class="beautified-select-wrap">
                             <select id="addCardGroupSelect"></select>
