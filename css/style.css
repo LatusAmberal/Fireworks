@@ -1459,25 +1459,32 @@ html, body {
     margin-bottom: 8px;
 }
 
-/* Drawer icon grid */
+/* Drawer icon grid — horizontal scroll */
 .drawer-icon-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 12px;
     padding: 8px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
 }
+.drawer-icon-grid::-webkit-scrollbar { display: none; }
 
 .drawer-icon-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    padding: 20px 12px;
+    padding: 20px 16px;
     background: var(--bg-tertiary);
     border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition);
     border: 1px solid transparent;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
 .drawer-icon-item:hover {
@@ -1815,6 +1822,96 @@ html, body {
 }
 .cards-list.grid-layout .gift-card-desc {
     display: none;
+}
+
+/* Sticker card */
+.card-item.sticker-card .card-content-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.sticker-card-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: transparent;
+}
+.cards-list.grid-layout .card-item.sticker-card {
+    padding: 8px;
+}
+.cards-list.grid-layout .sticker-card-img {
+    width: 80px;
+    height: 80px;
+}
+.sticker-card-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80px;
+}
+/* Sticker upload area */
+.sticker-upload-area {
+    margin: 8px 0;
+}
+.sticker-upload-box {
+    border: 2px dashed var(--bg-accent);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-muted);
+}
+.sticker-upload-box:hover {
+    border-color: var(--blurple);
+    color: var(--blurple);
+    background: var(--bg-tertiary);
+}
+.sticker-upload-box svg {
+    margin-bottom: 10px;
+    opacity: 0.6;
+}
+.sticker-upload-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+.sticker-upload-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.sticker-upload-preview {
+    margin-top: 12px;
+    text-align: center;
+}
+.sticker-upload-preview img {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+.sticker-upload-filename {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* Sticker block notice */
+.sticker-block-notice {
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    text-align: center;
 }
 
 .card-content-wrap {
@@ -2616,6 +2713,7 @@ html, body {
 
 /* Empty state */
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.cards-list.grid-layout .empty-state { grid-column: 1 / -1; }
 .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
 
 /* Confirm dialog */
@@ -3453,4 +3551,136 @@ input[type="number"] {
     .splash-title { font-size: 28px; }
     .onboard-logo svg { width: 60px; height: 60px; }
     .register-input { font-size: 16px; padding: 11px 14px; }
+}
+
+/* ===== Sticker Picker Modal ===== */
+.sticker-picker-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+}
+.sticker-picker {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-height: 55vh;
+    background: var(--bg-secondary);
+    border-radius: 20px 20px 0 0;
+    z-index: 301;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    animation: drawerUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sticker-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(128,128,128,0.1);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+.sticker-picker-close {
+    width: 32px; height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 22px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sticker-picker-close:hover { background: var(--bg-hover); }
+.sticker-picker-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+    align-content: flex-start;
+}
+.sticker-picker-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    flex-shrink: 0;
+}
+.sticker-picker-item:hover {
+    transform: scale(1.08);
+    border-color: var(--blurple);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.sticker-picker-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+}
+.sticker-picker-empty {
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ===== Sticker Message (no bubble) ===== */
+.msg-sticker {
+    display: inline-block;
+    position: relative;
+    max-width: 160px;
+    cursor: pointer;
+}
+.msg-sticker img {
+    width: 100%;
+    height: auto;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 10px;
+    display: block;
+}
+.msg-sticker .msg-delete-bubble {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    background: var(--red, #ed4245);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10;
+}
+.msg-sticker:hover .msg-delete-bubble,
+.msg-sticker .msg-delete-bubble.visible {
+    display: flex;
+}
+/* Side alignment for sticker messages */
+.msg-row.msg-me .msg-sticker {
+    margin-left: auto;
+}
+.msg-row.msg-other .msg-sticker {
+    margin-right: auto;
 }
